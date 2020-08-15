@@ -4,7 +4,7 @@
 
 FROM shichenxie/scorecard
 
-RUN R --quiet -e "install.packages(c('png', 'reticulate', 'blastula'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')"
+RUN R --quiet -e "install.packages(c('png', 'reticulate', 'blastula', 'cronR'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')"
 
 # install nodejs #######################################################
 RUN apt-get update && \
@@ -54,9 +54,8 @@ RUN npm install -g configurable-http-proxy
 
 # jupyterhub_config
 RUN jupyterhub --generate-config
-COPY jupyterhub_config.py /
-# 
 
+# 
 # ENV JPH_DIR /etc/jupyterhub
 # RUN mkdir -p ${JPH_DIR}
 # COPY jupyterhub_config.py ${JPH_DIR}/jupyterhub_config.py
@@ -64,16 +63,12 @@ COPY jupyterhub_config.py /
 #     echo su -l root ${JPH_DIR}/jupyterhub.sh \& >> /etc/rc.local
     
 # authenticator  #######################################################
-# dummy authenticator
-RUN python3 -m venv ${CONDA_DIR} && \
-    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple jupyterhub-dummyauthenticator
-
 # native authenticator
 # https://native-authenticator.readthedocs.io/en/latest/quickstart.html
 # RUN git clone https://github.com/jupyterhub/nativeauthenticator.git /temp 
-# ADD nativeauthenticator /tmp/nativeauthenticator
-# RUN mv /tmp/nativeauthenticator ${CONDA_DIR}/bin/nativeauthenticator \
-#    && pip --no-cache-dir install -e ${CONDA_DIR}/bin/nativeauthenticator 
+ADD nativeauthenticator /tmp/nativeauthenticator
+RUN mv /tmp/nativeauthenticator ${CONDA_DIR}/bin/nativeauthenticator && \
+    pip --no-cache-dir install -e ${CONDA_DIR}/bin/nativeauthenticator 
 
 # R path ###############################################################
 RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
@@ -82,23 +77,41 @@ ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 RUN R --quiet -e "install.packages('IRkernel', repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
     R --quiet -e "IRkernel::installspec(user=FALSE)"#, prefix='${CONDA_DIR}/bin'
 
+RUN R --quiet -e "install.packages(c('odbc', 'sparklyr'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')"
 
+
+# transwarp odbc driver ################################################
+# http://support.transwarp.cn/t/odbc-jdbc/477
+COPY inceptor-connector-odbc-5.0.0-1.el6.x86_64.rpm /
+RUN apt-get update --fix-missing && \
+    apt-get -y install alien && \
+    alien -i inceptor-connector-odbc-5.0.0-1.el6.x86_64.rpm
+# copy all files to /etc
+RUN cp -a /usr/local/inceptor/. /etc/
+
+# jupyterhub config ####################################################
+COPY jupyterhub_config.py /
 CMD jupyterhub -f jupyterhub_config.py
-# add user group
-RUN addgroup ds
-    
+
 # Setup application
 EXPOSE 8000
 CMD jupyterhub
 
 
-
+# setting #############################################################
 # docker build -t dstudio .
 # mkdir -p $HOME/docker/dstudio
 # docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name dstudio dstudio
+
+# # after launch rstudio in browser, otherwise rstudio cant be entered by multiple uers
 # docker exec -it dstudio bash
+# chmod -R 777 /tmp/rstudio-server/secure-cookie-key
+
+# Authorization Area
+# http://localhost:8000/hub/authorize
+
+# useradd --create-home xieshichen
+# passwd xieshichen
 
 # adduser xieshichen # passwd xieshichen
 # adduser xieshichen ds
-# # after launch rstudio in browser
-# chmod -R 777 /tmp/rstudio-server/secure-cookie-key
