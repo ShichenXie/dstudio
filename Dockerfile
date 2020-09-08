@@ -86,6 +86,19 @@ RUN alien --install inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm --scripts
 # copy all files to /etc
 RUN cp -a /usr/local/inceptor/. /etc/
 
+RUN R --quiet -e "sparklyr::spark_install('2.2.1')"
+RUN python3 -m venv ${CONDA_DIR} && \
+    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
+         pyspark
+
+# Install jdk 8 ------------------------------------------------------#
+RUN apt-get -y install software-properties-common && \
+    apt-add-repository 'deb http://security.debian.org/debian-security stretch/updates main' && \
+    apt-get update && \
+    apt-get -y install openjdk-8-jdk
+RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
+
+
 # jupyterhub config ------------------------------------------------------#
 COPY jupyterhub_config.py /
 CMD jupyterhub -f jupyterhub_config.py
