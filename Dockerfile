@@ -61,14 +61,24 @@ RUN mv /tmp/nativeauthenticator ${CONDA_DIR}/bin/nativeauthenticator && \
     pip --no-cache-dir install -e ${CONDA_DIR}/bin/nativeauthenticator 
 
 # R path -----------------------------------------------------------------#
-RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron
+RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron && \
+    echo 'SPARK_HOME = "/opt/spark/spark-2.2.0-bin-hadoop2.7"' >> /usr/local/lib/R/etc/Renviron && \
+    echo 'SPARK_HOME_VERSION = "2.2.0"' >> /usr/local/lib/R/etc/Renviron
+
 ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 
 RUN R --quiet -e "install.packages('IRkernel', repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
-    R --quiet -e "IRkernel::installspec(user=FALSE)"#, prefix='${CONDA_DIR}/bin'
+    R --quiet -e "IRkernel::installspec(user=FALSE)"#, prefix='${CONDA_DIR}/bin' && \
+    R --quiet -e "install.packages(c('png', 'reticulate', 'odbc', 'sparklyr', 'blastula', 'cronR'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')"
 
-RUN R --quiet -e "install.packages(c('png', 'reticulate', 'odbc', 'sparklyr', 'blastula', 'cronR'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')"
+RUN chmod -R 777 /usr/local/lib/R
 
+# Install jdk 8 ----------------------------------------------------------#
+RUN apt-get -y install software-properties-common && \
+    apt-add-repository 'deb http://security.debian.org/debian-security stretch/updates main' && \
+    apt-get update && \
+    apt-get -y install openjdk-8-jdk && \
+    update-java-alternatives -s java-1.8.0-openjdk-amd64
 
 # transwarp odbc driver --------------------------------------------------#
 # https://www.cnblogs.com/nihaorz/p/12036344.html
@@ -77,33 +87,31 @@ COPY sources.list /etc/apt/sources.list
 
 # http://support.transwarp.cn/t/odbc-jdbc/477
 RUN apt-get update --fix-missing && \
-    apt-get -y install alien 
-RUN apt-get -y install apt-utils sasl2-bin libsasl2-dev libsasl2-modules
+    apt-get -y install alien && \
+    apt-get -y install apt-utils sasl2-bin libsasl2-dev libsasl2-modules
 
 COPY inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm  / 
 RUN alien --install inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm --scripts
+RUN cp -a /usr/local/inceptor/. /etc/ && \
+    rm inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm
 
-# copy all files to /etc
-RUN cp -a /usr/local/inceptor/. /etc/
+# spark r/py package 
+COPY spark-2.2.0-bin-hadoop2.7.tgz / 
+RUN mkdir -p /opt/spark
+RUN R --quiet -e "options(spark.install.dir = '/opt/spark'); sparklyr::spark_install_tar('spark-2.2.0-bin-hadoop2.7.tgz')" && \
+    rm spark-2.2.0-bin-hadoop2.7.tgz 
 
-RUN R --quiet -e "sparklyr::spark_install('2.2.1')"
 RUN python3 -m venv ${CONDA_DIR} && \
     pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
          pyspark
-
-# Install jdk 8 ------------------------------------------------------#
-RUN apt-get -y install software-properties-common && \
-    apt-add-repository 'deb http://security.debian.org/debian-security stretch/updates main' && \
-    apt-get update && \
-    apt-get -y install openjdk-8-jdk
-RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
-
 
 # jupyterhub config ------------------------------------------------------#
 COPY jupyterhub_config.py /
 CMD jupyterhub -f jupyterhub_config.py
 
 # Setup application
+RUN useradd --create-home xieshichen
+
 EXPOSE 8000
 CMD jupyterhub
 
@@ -130,3 +138,11 @@ CMD jupyterhub
 # docker save dstudio > dstudio.tar
 # docker load --input dstudio.tar
 
+
+
+# setting R environment config
+# https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
+# Sys.getenv('SPARK_HOME')
+# usethis::edit_r_environ() 
+# Sys.getenv('R_HOME') # /usr/local/lib/R
+# R_HOME/etc/.Renviron
