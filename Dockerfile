@@ -95,15 +95,20 @@ RUN alien --install inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm --scripts
 RUN cp -a /usr/local/inceptor/. /etc/ && \
     rm inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm
 
+# install Oracle Instant Client
+ADD oracle-instantclient*.rpm /tmp/
+RUN  alien --install /tmp/oracle-instantclient*.rpm --scripts && \
+     rm -f /tmp/oracle-instantclient*.rpm
+
 # spark r/py package 
 COPY spark-2.2.0-bin-hadoop2.7.tgz / 
 RUN mkdir -p /opt/spark
-RUN R --quiet -e "options(spark.install.dir = '/opt/spark'); sparklyr::spark_install_tar('spark-2.2.0-bin-hadoop2.7.tgz')" && \
-    rm spark-2.2.0-bin-hadoop2.7.tgz 
+RUN R --quiet -e "options(spark.install.dir = '/opt/spark'); sparklyr::spark_install_tar('spark-2.2.0-bin-hadoop2.7.tgz'); install.packages('RPostgres', repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
+    rm spark-2.2.0-bin-hadoop2.7.tgz
 
 RUN python3 -m venv ${CONDA_DIR} && \
     pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
-         pyspark
+         pyspark pandas sqlalchemy cx_Oracle --force
 
 # jupyterhub config ------------------------------------------------------#
 COPY jupyterhub_config.py /
