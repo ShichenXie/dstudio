@@ -1,8 +1,11 @@
 # https://github.com/rocker-org/binder
 # https://blog.csdn.net/weixin_41164688/article/details/101067324
 
-FROM shichenxie/scorecard:latest
+FROM rocker/verse:latest
 
+RUN R --quiet -e "install.packages(c('scorecard', 'h2o', 'xgboost'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
+    rm -rf /tmp/*
+  
 # https://www.cnblogs.com/nihaorz/p/12036344.html
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
 COPY sources.list /etc/apt/sources.list
@@ -66,29 +69,20 @@ RUN mv /tmp/nativeauthenticator ${CONDA_DIR}/bin/nativeauthenticator && \
     pip3 install -e ${CONDA_DIR}/bin/nativeauthenticator --no-cache-dir 
 
 # R path -----------------------------------------------------------------#
-RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron && \
-    echo 'SPARK_HOME = "/opt/spark/spark-2.2.0-bin-hadoop2.7"' >> /usr/local/lib/R/etc/Renviron && \
-    echo 'SPARK_HOME_VERSION = "2.2.0"' >> /usr/local/lib/R/etc/Renviron
+RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron 
+# echo 'SPARK_HOME = "/opt/spark/spark-2.2.0-bin-hadoop2.7"' >> /usr/local/lib/R/etc/Renviron && \
+# echo 'SPARK_HOME_VERSION = "2.2.0"' >> /usr/local/lib/R/etc/Renviron
 
 ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
+RUN chmod -R 777 /usr/local/lib/R
 
 RUN R --quiet -e "install.packages('IRkernel', repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
     R --quiet -e "IRkernel::installspec(user=FALSE)"#, prefix='${CONDA_DIR}/bin' && \
-    R --quiet -e "install.packages(c('png', 'reticulate', 'odbc', 'sparklyr', 'blastula', 'cronR'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
+    R --quiet -e "install.packages(c('png', 'reticulate', 'blastula', 'cronR'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
     rm -rf /tmp/*
 
-RUN chmod -R 777 /usr/local/lib/R
-
-# Install jdk 8 ----------------------------------------------------------#
-RUN apt-get -y install software-properties-common && \
-    apt-add-repository 'deb http://security.debian.org/debian-security stretch/updates main' && \
-    apt-get update && \
-    apt-get -y install openjdk-8-jdk && \
-    update-java-alternatives -s java-1.8.0-openjdk-amd64 && \
-    rm -rf /var/lib/apt/lists/*
-
-# transwarp odbc driver --------------------------------------------------#
-# http://support.transwarp.cn/t/odbc-jdbc/477
+# database drivers -------------------------------------------------------#
+# transwarp # http://support.transwarp.cn/t/odbc-jdbc/477
 RUN apt-get update --fix-missing && \
     apt-get -y install alien && \
     apt-get -y install apt-utils sasl2-bin libsasl2-dev libsasl2-modules && \
@@ -99,21 +93,19 @@ RUN alien --install inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm --scripts
 RUN cp -a /usr/local/inceptor/. /etc/ && \
     rm inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm
 
-# install Oracle Instant Client
-ADD oracle-instantclient*.rpm /tmp/
-RUN  alien --install /tmp/oracle-instantclient*.rpm --scripts && \
-     rm -f /tmp/oracle-instantclient*.rpm
 
-# spark r/py package 
-COPY spark-2.2.0-bin-hadoop2.7.tgz / 
-RUN mkdir -p /opt/spark
-RUN R --quiet -e "options(spark.install.dir = '/opt/spark'); sparklyr::spark_install_tar('spark-2.2.0-bin-hadoop2.7.tgz'); install.packages('RPostgres', repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
-    rm spark-2.2.0-bin-hadoop2.7.tgz && \
+# r/py packages
+RUN R --quiet -e "install.packages(c('odbc', 'RJDBC', 'RPostgres'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \ 
     rm -rf /tmp/*
-
+    
 RUN python3 -m venv ${CONDA_DIR} && \
     pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
-         pyspark sqlalchemy cx_Oracle pandas --force
+         sqlalchemy JayDeBeApi psycopg2 cx_Oracle pandas --force
+
+# https://blogs.oracle.com/r/r-to-oracle-database-connectivity:-use-roracle-for-both-performance-and-scalability
+RUN mkdir -p /opt/dbjar && \
+    mkdir -p /opt/dbjar/hive
+ADD oracle/oracle /opt/dbjar/oracle
 
 # jupyterhub config ------------------------------------------------------#
 COPY jupyterhub_config.py /
