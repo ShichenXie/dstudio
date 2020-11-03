@@ -1,12 +1,9 @@
-# https://github.com/rocker-org/binder
-# https://blog.csdn.net/weixin_41164688/article/details/101067324
-
-FROM rocker/verse:latest
+FROM rocker/verse:4.0.3
 
 RUN R --quiet -e "install.packages(c('scorecard', 'h2o', 'xgboost'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
     rm -rf /tmp/*
   
-# https://www.cnblogs.com/nihaorz/p/12036344.html
+# set local source.list
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
 COPY sources.list /etc/apt/sources.list
 
@@ -70,9 +67,6 @@ RUN mv /tmp/nativeauthenticator ${CONDA_DIR}/bin/nativeauthenticator && \
 
 # R path -----------------------------------------------------------------#
 RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron 
-# echo 'SPARK_HOME = "/opt/spark/spark-2.2.0-bin-hadoop2.7"' >> /usr/local/lib/R/etc/Renviron && \
-# echo 'SPARK_HOME_VERSION = "2.2.0"' >> /usr/local/lib/R/etc/Renviron
-
 ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
 RUN chmod -R 777 /usr/local/lib/R
 
@@ -82,18 +76,6 @@ RUN R --quiet -e "install.packages('IRkernel', repos = 'https://mirrors.tuna.tsi
     rm -rf /tmp/*
 
 # database drivers -------------------------------------------------------#
-# transwarp # http://support.transwarp.cn/t/odbc-jdbc/477
-RUN apt-get update --fix-missing && \
-    apt-get -y install alien && \
-    apt-get -y install apt-utils sasl2-bin libsasl2-dev libsasl2-modules && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm  / 
-RUN alien --install inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm --scripts
-RUN cp -a /usr/local/inceptor/. /etc/ && \
-    rm inceptor-connector-odbc-6.0.0-1.el6.x86_64.rpm
-
-
 # r/py packages
 RUN R --quiet -e "install.packages(c('odbc', 'RJDBC', 'RPostgres'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \ 
     rm -rf /tmp/*
@@ -112,39 +94,9 @@ COPY jupyterhub_config.py /
 CMD jupyterhub -f jupyterhub_config.py
 
 # Setup application
-RUN useradd --create-home xieshichen
+RUN useradd --create-home rstudio
 
 EXPOSE 8000
 CMD jupyterhub
 
 
-# setting ----------------------------------------------------------------#
-# docker build -t dstudio .
-# mkdir -p $HOME/docker/dstudio
-# docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name dstudio dstudio
-
-# # after launch rstudio in browser, otherwise rstudio cant be entered by multiple uers
-# docker exec -it dstudio bash
-# chmod -R 777 /tmp/rstudio-server/secure-cookie-key
-
-# Authorization Area
-# http://localhost:8000/hub/authorize
-# http://localhost:8000/hub/change-password
-
-# useradd --create-home xieshichen
-# passwd xieshichen
-
-# adduser xieshichen # passwd xieshichen
-# adduser xieshichen ds
-
-# docker save dstudio > dstudio.tar
-# docker load --input dstudio.tar
-
-
-
-# setting R environment config
-# https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
-# Sys.getenv('SPARK_HOME')
-# usethis::edit_r_environ() 
-# Sys.getenv('R_HOME') # /usr/local/lib/R
-# R_HOME/etc/.Renviron

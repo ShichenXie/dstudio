@@ -21,7 +21,7 @@ c.Authenticator.minimum_password_length = 6
 
 # c.Authenticator.whitelist = {'test1', 'test2'}  
 # c.LocalAuthenticator.group_whitelist = {'ds'}
-# c.LocalAuthenticator.create_system_users = True
+c.LocalAuthenticator.create_system_users = True
 # 
 c.PAMAuthenticator.encoding ='utf8'
 
