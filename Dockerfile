@@ -90,7 +90,7 @@ RUN python3 -m venv ${CONDA_DIR} && \
 # https://blogs.oracle.com/r/r-to-oracle-database-connectivity:-use-roracle-for-both-performance-and-scalability
 RUN mkdir -p /opt/dbjar && \
     mkdir -p /opt/dbjar/hive
-ADD oracle/oracle /opt/dbjar/oracle
+ADD oracle /opt/dbjar/oracle
 
 # jupyterhub config ------------------------------------------------------#
 COPY jupyterhub_config.py /
