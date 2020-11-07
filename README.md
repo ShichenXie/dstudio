@@ -22,9 +22,11 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 
 登陆过程。默认的用户名为 dstudio，该账号有管理员权限。密码需要通过点击 Singup 进入注册页面创建用户时生成。然后点击 Login，回到登陆页输入 dstudio 和设定的密码。登陆之后进入 jupyter 页面，在右边的 New 下拉框中选择 RStudio，进入 rstudio server 环境。
 
-创建新用户过程。先由新用户在 `http://localhost:8000/` 页面点击 Singup，进入注册页面新建用户并设定密码。然后由管理员 dstudio 登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面审批。由于这里的用户权限管理系统使用的是 [JupyterHub 的 nativeauthenticator](https://native-authenticator.readthedocs.io/en/latest/)，不支持自动创建系统用户，还需要回到终端中输入 ```docker exec -it dstudio bash```，进入运行的容器中创建系统用户 `useradd --create-home test`。为了支持多用户访问 rstudio server，还需要修改文件权限 ```chmod -R 777 /tmp/rstudio-server/secure-cookie-key```，该文件只要访问过 rstudio server 之后才会自动生成。
+创建新用户过程。先由新用户在 `http://localhost:8000/` 页面点击 Singup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员 dstudio 登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面进行审批。由于这里的用户权限管理系统使用的是 [JupyterHub 的 nativeauthenticator](https://native-authenticator.readthedocs.io/en/latest/)，不支持自动创建系统用户（其他的用户权限管理方式支持在 Control Panel 中创建系统用户，但是需要依托外部系统，例如LDAP等）。因此还需要回到终端中输入 ```docker exec -it dstudio bash```，进入运行中的容器创建系统用户 `useradd --create-home test`。
 
-修改密码。登陆之后，进入 `http://localhost:8000/hub/change-password` 可以自行修改密码。
+经过以上步骤，新用户 test 就可以登陆使用了，不过暂时还无法启动 rstudio server。因为多用户访问 rstudio server 时，需要为每一位用户生成相应的  secret-cookie-key。当第一位用户打开 rstudio server 之后，会自动在 /tmp/rstudio-server/ 中生成该文件，并且只有第一位用户拥有读写权限。这里可以进入容器中 ```docker exec -it dstudio bash```，直接修改该文件的权限 ```chmod -R 777 /tmp/rstudio-server/secure-cookie-key```，前提是该文件已经存在，也就是已经有一个用户打开过了 rstudio server。本步骤只需要操作一次，其他新用户创建过程参照上一步即可。
+
+修改密码。用原密码登陆之后，进入 `http://localhost:8000/hub/change-password` 页面可以更新密码。
 
 # 贡献与参考
 
@@ -37,3 +39,5 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 - [JupyterHub](https://jupyter.org/hub)
 - [JupyterHub Native Authenticator](https://native-authenticator.readthedocs.io/en/latest/)
 - [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy)
+- [RStudio Server Professional Edition - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
+
