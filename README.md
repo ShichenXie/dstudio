@@ -22,9 +22,9 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 
 登陆过程。默认的用户名为 dstudio，该账号有管理员权限。密码需要通过点击 Signup 进入注册页面创建用户时生成。然后点击 Login，回到登陆页输入 dstudio 和设定的密码。登陆之后进入 jupyter 页面，在右边的 New 下拉框中选择 RStudio，进入 rstudio server 环境。
 
-![](login.png)
-![](jupyter.png)
-![](rstudio.png)
+![login](./img/login.png)
+![jupyter](./img/jupyter.png)
+![rstudio](./img/rstudio.png)
 
 创建新用户过程。先由新用户在 `http://localhost:8000/` 页面点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员 dstudio 登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面进行审批。由于这里的用户权限管理系统使用的是 [JupyterHub 的 nativeauthenticator](https://native-authenticator.readthedocs.io/en/latest/)，不支持自动创建系统用户（其他的用户权限管理方式支持在 Control Panel 中创建系统用户，但是需要依托外部系统，例如LDAP等）。因此还需要回到终端中输入 ```docker exec -it dstudio bash```，进入运行中的容器创建系统用户 `useradd --create-home test`。
 
