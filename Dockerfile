@@ -1,6 +1,7 @@
-FROM rocker/verse:4.0.3
+FROM rocker/verse:3.6.3
+# FROM rocker/verse:4.0.3
 
-RUN R --quiet -e "install.packages(c('scorecard', 'h2o', 'xgboost'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
+RUN R --quiet -e "install.packages(c('scorecard', 'xgboost', 'h2o'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \
     rm -rf /tmp/*
   
 # set local source.list
@@ -9,10 +10,10 @@ COPY sources.list /etc/apt/sources.list
 
 # install nodejs ---------------------------------------------------------#
 RUN apt-get update && \
-    apt-get -y install curl cmake && \
+    apt-get install -y curl cmake && \
     curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh && \
     bash nodesource_setup.sh && \
-    apt-get -y install nodejs && \
+    apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
 # install anaconda3 ------------------------------------------------------#
@@ -20,11 +21,13 @@ RUN apt-get update && \
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH /opt/conda/bin:$PATH
 
-RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \
+RUN apt-get update && \
+    apt-get install -y wget bzip2 ca-certificates \
     libglib2.0-0 libxext6 libsm6 libxrender1 \
-    git mercurial subversion
+    git mercurial subversion && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN wget --quiet https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-5.3.0-Linux-x86_64.sh -O ~/anaconda.sh && \
+RUN wget --quiet https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-5.3.1-Linux-x86_64.sh -O ~/anaconda.sh && \
     /bin/bash ~/anaconda.sh -b -p /opt/conda && \
     rm ~/anaconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
@@ -94,7 +97,7 @@ COPY jupyterhub_config.py /
 CMD jupyterhub -f jupyterhub_config.py
 
 # Setup application
-RUN useradd --create-home rstudio
+RUN useradd --create-home dstudio
 
 EXPOSE 8000
 CMD jupyterhub

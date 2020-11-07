@@ -13,8 +13,8 @@ c.Spawner.default_url = '/tree'
 c.Spawner.debug = True
 
 # Administrators - set of users who can administer the Hub itself
-c.Authenticator.admin_users = {"rstudio"}
-# c.Authenticator.whitelist = {"rstudio", 'test'}
+c.Authenticator.admin_users = {"dstudio"}
+# c.Authenticator.whitelist = {"dstudio", 'test'}
 
 # c.Authenticator.check_common_password = False
 c.Authenticator.minimum_password_length = 6
