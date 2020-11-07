@@ -6,6 +6,8 @@
 
 dstudio 是一个将 rstudio server 和 jupyter notebook 打包在一起的 docker 容器。极大的简化了在线建模分析平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 与 python 环境，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server 专业版](https://rstudio.com/products/rstudio-server-pro/)提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
 
+![login](./img/login.png)
+
 # 如何开始
 
 首先需要配置 docker 环境，其安装过程参见[docker 在线文档](https://docs.docker.com/get-started/)。
@@ -22,7 +24,6 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 
 登陆过程。默认的用户名为 dstudio，该账号有管理员权限。密码需要通过点击 Signup 进入注册页面创建用户时生成。然后点击 Login，回到登陆页输入 dstudio 和设定的密码。登陆之后进入 jupyter 页面，在右边的 New 下拉框中选择 RStudio，进入 rstudio server 环境。
 
-![login](./img/login.png)
 ![jupyter](./img/jupyter.png)
 ![rstudio](./img/rstudio.png)
 
