@@ -45,4 +45,4 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 - [JupyterHub Native Authenticator](https://native-authenticator.readthedocs.io/en/latest/)
 - [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy)
 - [RStudio Server Professional Edition - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
-
+- [Version-stable Rocker images](https://github.com/rocker-org/rocker-versioned)
