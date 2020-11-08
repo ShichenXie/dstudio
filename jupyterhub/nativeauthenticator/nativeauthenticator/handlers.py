@@ -14,19 +14,17 @@ TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
 
 class LocalBase(BaseHandler):
-    def __init__(self, *args, **kwargs):
-        self._loaded = False
-        super().__init__(*args, **kwargs)
+    _template_dir_registered = False
 
-    def _register_template_path(self):
-        if self._loaded:
-            return
-        self.log.debug('Adding %s to template path', TEMPLATE_DIR)
-        loader = FileSystemLoader([TEMPLATE_DIR])
-        env = self.settings['jinja2_env']
-        previous_loader = env.loader
-        env.loader = ChoiceLoader([previous_loader, loader])
-        self._loaded = True
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not LocalBase._template_dir_registered:
+            self.log.debug('Adding %s to template path', TEMPLATE_DIR)
+            loader = FileSystemLoader([TEMPLATE_DIR])
+            env = self.settings['jinja2_env']
+            previous_loader = env.loader
+            env.loader = ChoiceLoader([previous_loader, loader])
+            LocalBase._template_dir_registered = True
 
 
 class SignUpHandler(LocalBase):
@@ -35,7 +33,6 @@ class SignUpHandler(LocalBase):
         if not self.authenticator.enable_signup:
             raise web.HTTPError(404)
 
-        self._register_template_path()
         html = self.render_template(
             'signup.html',
             ask_email=self.authenticator.ask_email_on_signup,
@@ -112,7 +109,6 @@ class AuthorizationHandler(LocalBase):
     """Render the sign in page."""
     @admin_only
     async def get(self):
-        self._register_template_path()
         html = self.render_template(
             'autorization-area.html',
             ask_email=self.authenticator.ask_email_on_signup,
@@ -133,8 +129,11 @@ class ChangePasswordHandler(LocalBase):
 
     @web.authenticated
     async def get(self):
-        self._register_template_path()
-        html = self.render_template('change-password.html')
+        user = await self.get_current_user()
+        html = self.render_template(
+            'change-password.html',
+            user_name=user.name,
+        )
         self.finish(html)
 
     @web.authenticated
@@ -145,7 +144,35 @@ class ChangePasswordHandler(LocalBase):
 
         html = self.render_template(
             'change-password.html',
+            user_name=user.name,
             result_message='Your password has been changed successfully',
+        )
+        self.finish(html)
+
+
+class ChangePasswordAdminHandler(LocalBase):
+    """Render the reset password page."""
+
+    @admin_only
+    async def get(self, user_name):
+        if not self.authenticator.user_exists(user_name):
+            raise web.HTTPError(404)
+        html = self.render_template(
+            'change-password.html',
+            user_name=user_name,
+        )
+        self.finish(html)
+
+    @admin_only
+    async def post(self, user_name):
+        new_password = self.get_body_argument('password', strip=False)
+        self.authenticator.change_password(user_name, new_password)
+
+        message_template = 'The password for {} has been changed successfully'
+        html = self.render_template(
+            'change-password.html',
+            user_name=user_name,
+            result_message=message_template.format(user_name),
         )
         self.finish(html)
 
@@ -153,7 +180,6 @@ class ChangePasswordHandler(LocalBase):
 class LoginHandler(LoginHandler, LocalBase):
 
     def _render(self, login_error=None, username=None):
-        self._register_template_path()
         return self.render_template(
             'native-login.html',
             next=url_escape(self.get_argument('next', default='')),

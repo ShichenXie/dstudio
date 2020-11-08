@@ -9,8 +9,10 @@ from sqlalchemy import inspect
 from tornado import gen
 from traitlets import Bool, Integer, Unicode
 
-from .handlers import (AuthorizationHandler, ChangeAuthorizationHandler,
-                       ChangePasswordHandler, LoginHandler, SignUpHandler)
+from .handlers import (
+    AuthorizationHandler, ChangeAuthorizationHandler, ChangePasswordHandler,
+    ChangePasswordAdminHandler, LoginHandler, SignUpHandler,
+)
 from .orm import UserInfo
 
 
@@ -194,7 +196,21 @@ class NativeAuthenticator(Authenticator):
         encoded_pw = bcrypt.hashpw(pw.encode(), bcrypt.gensalt())
         infos = {'username': username, 'password': encoded_pw}
         infos.update(kwargs)
-        if username in self.admin_users or self.open_signup:
+        admins = self.admin_users
+
+        try:
+            allowed = self.allowed_users
+        except AttributeError:
+            try:
+                # Deprecated for jupyterhub >= 1.2
+                allowed = self.whitelist
+            except AttributeError:
+                # Not present at all in jupyterhub < 0.9
+                allowed = {}
+
+        authed = admins.union(allowed)
+
+        if self.open_signup or username in authed:
             infos.update({'is_authorized': True})
 
         try:
@@ -224,6 +240,7 @@ class NativeAuthenticator(Authenticator):
             (r'/authorize', AuthorizationHandler),
             (r'/authorize/([^/]*)', ChangeAuthorizationHandler),
             (r'/change-password', ChangePasswordHandler),
+            (r'/change-password/([^/]+)', ChangePasswordAdminHandler),
         ]
         return native_handlers
 

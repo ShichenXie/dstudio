@@ -19,7 +19,7 @@ mkdir -p $HOME/docker/dstudio
 
 然后在终端中运行以下代码，就可以通过浏览器访问 rstudio server 和 jupyter notebook 了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址。
 ```
-docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name dstudio shichenxie/dstudio:0.1.0
+docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name dstudio shichenxie/dstudio
 ```
 
 登陆过程。默认的用户名为 dstudio，该账号有管理员权限。密码需要通过点击 Signup 进入注册页面创建用户时生成。然后点击 Login，回到登陆页输入 dstudio 和设定的密码。登陆之后进入 jupyter 页面，在右边的 New 下拉框中选择 RStudio，进入 rstudio server 环境。
