@@ -35,7 +35,7 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 
 # 贡献与参考
 
-如果您对本项目感欢迎使用、star。由于目前还有一些功能可以完善，例如：自动创建用户目录、降低容器的大小（现在有7G多）等，如果您有任何想法欢迎讨论，或者直接提交pr。
+如果您对本项目感兴趣，欢迎使用、star。由于目前还有一些功能可以完善，例如：自动创建用户目录、降低容器的大小（现在有8G多）等，如果您有任何想法欢迎讨论，或者直接提交pr。
 
 类似的项目有 [ShinyStudio](https://github.com/dm3ll3n/ShinyStudio)，不过是基于  [shinyproxy](https://www.shinyproxy.io/) 开发的。
 

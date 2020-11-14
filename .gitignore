@@ -3,5 +3,4 @@
 .RData
 .Ruserdata
 binder.Rproj
-spark/*
 dstudio_bf/*

@@ -16,8 +16,10 @@ c.Spawner.debug = True
 c.Authenticator.admin_users = {"dstudio"}
 # c.Authenticator.whitelist = {"dstudio", 'test'}
 
-# c.Authenticator.check_common_password = False
+c.Authenticator.check_common_password = True
 c.Authenticator.minimum_password_length = 6
+c.Authenticator.allowed_failed_logins = 3
+
 
 # c.LocalAuthenticator.group_whitelist = {'ds'}
 c.LocalAuthenticator.create_system_users = True

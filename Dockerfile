@@ -1,8 +1,8 @@
-FROM rocker/verse:3.6.3
+FROM rocker/verse:4.0.1
 
 # set local source.list
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
-COPY ./linux_source/sources_debian.list /etc/apt/sources.list
+COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
 
 # set local cran url
 ARG cran_loc
@@ -86,13 +86,9 @@ RUN python3 -m venv ${CONDA_DIR} && \
          dockerspawner 
 RUN npm install -g configurable-http-proxy
 
-# jupyterhub_config
-RUN jupyterhub --generate-config
-    
 # R path -----------------------------------------------------------------#
 RUN echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron 
 ENV LD_LIBRARY_PATH /usr/local/lib/R/lib
-RUN chmod -R 777 /usr/local/lib/R
 
 RUN R --quiet -e "install.packages('IRkernel', repos = '$cran_loc')" && \
     R --quiet -e "IRkernel::installspec(user=FALSE)"#, prefix='${CONDA_DIR}/bin' && \
@@ -111,13 +107,13 @@ RUN python3 -m venv ${CONDA_DIR} && \
 # https://blogs.oracle.com/r/r-to-oracle-database-connectivity:-use-roracle-for-both-performance-and-scalability
 RUN mkdir -p /opt/dbjar && \
     mkdir -p /opt/dbjar/hive
-ADD ./oracle /opt/dbjar/oracle
+ADD ./db/oracle /opt/dbjar/oracle
 
 # install package from local file ---------------------------------------#
 # nativeauthenticator 
 # https://native-authenticator.readthedocs.io/en/latest/
 # RUN git clone https://github.com/jupyterhub/nativeauthenticator.git /tmp/nativeauthenticator
-ADD ./jupyterhub/nativeauthenticator /tmp/nativeauthenticator
+ADD ./jupyter/nativeauthenticator /tmp/nativeauthenticator
 
 # jupyter-shiny-proxy
 ADD ./shiny/jupyter_shiny_proxy /tmp/jupyter_shiny_proxy
@@ -125,18 +121,30 @@ ADD ./shiny/jupyter_shiny_proxy /tmp/jupyter_shiny_proxy
 # native authenticator
 # https://native-authenticator.readthedocs.io/en/latest/quickstart.html
 RUN R --quiet -e "install.packages(c('shinythemes', 'shinydashboard'), repos = '$cran_loc')" && \ 
-    chmod -R 777 /srv/shiny-server && \
     chown -R shiny:shiny /srv/shiny-server && \
     pip3 install /tmp/nativeauthenticator && \
     pip3 install /tmp/jupyter_shiny_proxy && \
     rm -rf /tmp/*
 
-# jupyterhub config ------------------------------------------------------#
-COPY ./jupyterhub/jupyterhub_config.py /
+# config ------------------------------------------------------#
+# jupyterhub config
+RUN jupyterhub --generate-config
+COPY ./config/jupyterhub_config.py /
 CMD jupyterhub -f jupyterhub_config.py
 
-# Setup application
+# jupyter notebook config # jupyter --paths
+RUN jupyter notebook --generate-config
+COPY ./config/jupyter_notebook_config.py /opt/conda/etc/jupyter/
+
+# rstudio server config
+COPY ./config/rstudio-prefs.json /etc/rstudio/
+
+
+# create home folder 
 RUN useradd --create-home dstudio
+# set the permissions of shiny/r-library folder
+RUN chmod -R 777 /srv/shiny-server && \
+    chmod -R 777 /usr/local/lib/R
 
 EXPOSE 8000
 CMD jupyterhub
