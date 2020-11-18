@@ -141,7 +141,7 @@ COPY ./config/rstudio-prefs.json /etc/rstudio/
 
 
 # create home folder 
-RUN useradd --create-home dstudio
+RUN useradd -m -d /home/dstudio dstudio
 # set the permissions of shiny/r-library folder
 RUN chmod -R 777 /srv/shiny-server && \
     chmod -R 777 /usr/local/lib/R
