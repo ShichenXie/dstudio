@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个将 rstudio server 和 jupyter notebook 打包在一起的 docker 容器。极大的简化了在线建模分析平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 与 python 环境，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server 专业版](https://rstudio.com/products/rstudio-server-pro/)提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
+dstudio 是一个将 rstudio server 和 jupyter notebook 打包在一起的 docker 容器。极大的简化了在线建模分析平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 与 python 环境，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
 
 ![login](./img/login.png)
 
@@ -44,5 +44,5 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 - [JupyterHub](https://jupyter.org/hub)
 - [JupyterHub Native Authenticator](https://native-authenticator.readthedocs.io/en/latest/)
 - [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy)
-- [RStudio Server Professional Edition - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
+- [RStudio Server Pro - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
 - [Version-stable Rocker images](https://github.com/rocker-org/rocker-versioned)

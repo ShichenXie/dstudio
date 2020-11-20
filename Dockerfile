@@ -8,35 +8,6 @@ COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
 ARG cran_loc
 ENV cran_loc https://mirrors.tuna.tsinghua.edu.cn/CRAN/
 
-# install shiny ----------------------------------------------------------#
-# https://github.com/rocker-org/shiny
-RUN apt-get update && \
-    apt-get install -y \
-    sudo \
-    gdebi-core \
-    pandoc \
-    pandoc-citeproc \
-    libcurl4-gnutls-dev \
-    libcairo2-dev \
-    libxt-dev \
-    xtail \
-    wget && \
-    rm -rf /lib/apt/lists/*
-
-# Download and install shiny server
-RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION -O "version.txt" && \
-    VERSION=$(cat version.txt)  && \
-    wget --no-verbose "https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
-    gdebi -n ss-latest.deb && \
-    rm -f version.txt ss-latest.deb && \
-    . /etc/environment && \
-    R -e "install.packages(c('shiny', 'rmarkdown'), repos='$cran_loc')" && \
-    cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/ && \
-    chown shiny:shiny /var/lib/shiny-server
-
-COPY ./shiny/shiny-server.sh /usr/bin/shiny-server.sh
-CMD ["/usr/bin/shiny-server.sh"]
-
 # install nodejs ---------------------------------------------------------#
 RUN apt-get update && \
     apt-get install -y curl cmake && \
@@ -114,17 +85,7 @@ ADD ./db/oracle /opt/dbjar/oracle
 # https://native-authenticator.readthedocs.io/en/latest/
 # RUN git clone https://github.com/jupyterhub/nativeauthenticator.git /tmp/nativeauthenticator
 ADD ./jupyter/nativeauthenticator /tmp/nativeauthenticator
-
-# jupyter-shiny-proxy
-ADD ./shiny/jupyter_shiny_proxy /tmp/jupyter_shiny_proxy
-
-# native authenticator
-# https://native-authenticator.readthedocs.io/en/latest/quickstart.html
-RUN R --quiet -e "install.packages(c('shinythemes', 'shinydashboard'), repos = '$cran_loc')" && \ 
-    chown -R shiny:shiny /srv/shiny-server && \
-    pip3 install /tmp/nativeauthenticator && \
-    pip3 install /tmp/jupyter_shiny_proxy && \
-    rm -rf /tmp/*
+RUN pip3 install /tmp/nativeauthenticator
 
 # config ------------------------------------------------------#
 # jupyterhub config
@@ -138,13 +99,14 @@ COPY ./config/jupyter_notebook_config.py /opt/conda/etc/jupyter/
 
 # rstudio server config
 COPY ./config/rstudio-prefs.json /etc/rstudio/
+# COPY ./config/rserver.conf /etc/rstudio/
 
 
 # create home folder 
 RUN useradd -m -d /home/dstudio dstudio
-# set the permissions of shiny/r-library folder
-RUN chmod -R 777 /srv/shiny-server && \
-    chmod -R 777 /usr/local/lib/R
+# set the permissions of r-library folder
+RUN chmod -R 777 /usr/local/lib/R 
+    
 
 EXPOSE 8000
 CMD jupyterhub
