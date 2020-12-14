@@ -194,3 +194,22 @@ class LoginHandler(LoginHandler, LocalBase):
                 {'next': self.get_argument('next', '')},
             ),
         )
+
+
+class DiscardHandler(LocalBase):
+    """Discard a user from database"""
+
+    @admin_only
+    async def get(self, user_name):
+        user = self.authenticator.get_user(user_name)
+        if user is not None:
+            if not user.is_authorized:
+                # Delete user from NativeAuthenticator db table (users_info)
+                user = type('User', (), {'name': user_name})
+                self.authenticator.delete_user(user)
+
+                # Also delete user from jupyterhub registry, if present
+                if self.users.get(user_name) is not None:
+                    self.users.delete(user_name)
+
+        self.redirect(self.hub.base_url + 'authorize')

@@ -14,12 +14,12 @@ dstudio 是一个将 rstudio server 和 jupyter notebook 打包在一起的 dock
 
 安装好 docker 之后，需要在电脑上新建文件夹作为 docker 容器指向的用户目录。即在该文件夹存储 dstudio 的用户文件，否则 docker 容器删除之后，用户的建模分析结果就会丢失了。
 ```
-mkdir -p $HOME/docker/dstudio
+mkdir -p $HOME/docker/dstudio_home/dstudio
 ```
 
-然后在终端中运行以下代码，就可以通过浏览器访问 rstudio server 和 jupyter notebook 了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址。
+然后在终端中运行以下代码，就可以通过浏览器访问 rstudio server 和 jupyter notebook 了。如果部署在本地电脑上，访问地址为 `http://localhost:8888/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址。
 ```
-docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name dstudio shichenxie/dstudio
+docker run -d -p 8888:8888  -v $HOME/docker/dstudio_home:/home --restart=always --name dstudio shichenxie/dstudio
 ```
 
 登陆过程。默认的用户名为 dstudio，该账号有管理员权限。密码需要通过点击 Signup 进入注册页面创建用户时生成。然后点击 Login，回到登陆页输入 dstudio 和设定的密码。登陆之后进入 jupyter 页面，在右边的 New 下拉框中选择 RStudio，进入 rstudio server 环境。
@@ -27,15 +27,22 @@ docker run -d -p 8000:8000 -v $HOME/docker/dstudio:/home --restart=always --name
 ![jupyter](./img/jupyter.png)
 ![rstudio](./img/rstudio.png)
 
-创建新用户过程。先由新用户在 `http://localhost:8000/` 页面点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员 dstudio 登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面进行审批。由于这里的用户权限管理系统使用的是 [JupyterHub 的 nativeauthenticator](https://native-authenticator.readthedocs.io/en/latest/)，不支持自动创建系统用户（其他的用户权限管理方式支持在 Control Panel 中创建系统用户，但是需要依托外部系统，例如LDAP等）。因此还需要回到终端中输入 ```docker exec -it dstudio bash```，进入运行中的容器创建系统用户 `useradd --create-home test`。
+创建新用户过程。先由新用户在 `http://localhost:8888/` 页面点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员 dstudio 登陆，并跳转至 `http://localhost:8888/hub/authorize` 页面进行审批。由于这里的用户权限管理系统使用的是 [JupyterHub 的 nativeauthenticator](https://native-authenticator.readthedocs.io/en/latest/)，不支持自动创建系统用户（其他的用户权限管理方式支持在 Control Panel 中创建系统用户，但是需要依托外部系统，例如LDAP等）。因此还需要回到终端中输入 ```docker exec -it dstudio bash```，进入运行中的容器创建系统用户
+```
+useradd -m -g users -G ds -d /home/test test 
+```
+该用户有安装包的权限，如果不希望新建的用户拥有该权限，则可以去掉其中的`-g users`。
 
-经过以上步骤，新用户 test 就可以登陆使用了，不过暂时还无法启动 rstudio server。因为多用户访问 rstudio server 时，需要为每一位用户生成相应的  secret-cookie-key。当第一位用户打开 rstudio server 之后，会自动在 /tmp/rstudio-server/ 中生成该文件，并且只有第一位用户拥有读写权限。这里可以进入容器中 ```docker exec -it dstudio bash```，直接修改该文件的权限 ```chmod -R 777 /tmp/rstudio-server/secure-cookie-key```，前提是该文件已经存在，也就是已经有一个用户打开过了 rstudio server。本步骤只需要操作一次，其他新用户创建过程参照上一步即可。
 
-修改密码。用原密码登陆之后，进入 `http://localhost:8000/hub/change-password` 页面可以更新密码。
+经过以上步骤，新用户 test 就可以登陆使用了，不过暂时还无法启动 rstudio server。因为多用户访问 rstudio server 时，需要为每一位用户生成相应的  secret-cookie-key。当第一位用户打开 rstudio server 之后，会自动在 /tmp/rstudio-server/ 中生成该文件，并且只有第一位用户拥有读写权限。这里可以进入容器中 ```docker exec -it dstudio bash```，直接修改该文件的权限 ```chmod -R 775 /tmp/rstudio-server/secure-cookie-key```，前提是该文件已经存在，也就是已经有一个用户打开过了 rstudio server。本步骤只需要操作一次，其他新用户创建过程参照上一步即可。
+
+修改密码。用原密码登陆之后，进入 `http://localhost:8888/hub/change-password` 页面可以更新密码。
 
 # 贡献与参考
 
-如果您对本项目感兴趣，欢迎使用、star。由于目前还有一些功能可以完善，例如：自动创建用户目录、降低容器的大小（现在有8G多）等，如果您有任何想法欢迎讨论，或者直接提交pr。
+如果您对本项目感兴趣，欢迎使用、star。由于目前还有一些功能可以完善，例如：自动创建用户目录、降低容器的大小等，如果您有任何想法欢迎讨论，或者直接提交pr。
+
+本项目适合小中型团队搭建在线建模分析平台；对于中型团队可以参考 [defeo/jupyterhub-docker](https://github.com/defeo/jupyterhub-docker)；对于大型团队需要集群扩展的可以参考 [jupyterhub 的官方文档](https://zero-to-jupyterhub.readthedocs.io/en/stable/)。
 
 类似的项目有 [ShinyStudio](https://github.com/dm3ll3n/ShinyStudio)，不过是基于  [shinyproxy](https://www.shinyproxy.io/) 开发的。
 
