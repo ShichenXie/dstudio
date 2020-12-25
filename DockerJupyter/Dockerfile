@@ -69,8 +69,11 @@ RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
 # nativeauthenticator ----------------------------------------------------#
 # https://native-authenticator.readthedocs.io/en/latest/
 # RUN git clone https://github.com/jupyterhub/nativeauthenticator.git /tmp/nativeauthenticator
-ADD ./nativeauthenticator /tmp/nativeauthenticator
-RUN pip install /tmp/nativeauthenticator 
+COPY ./nativeauthenticator /tmp/nativeauthenticator
+RUN pip install /tmp/nativeauthenticator &&\
+    rm -rf /tmp/*
+# https://github.com/jtpio/jupyterlab-python-file
+RUN jupyter labextension install jupyterlab-python-file 
 
 # config =================================================================#
 # create group/user
@@ -90,10 +93,11 @@ COPY ./config/jupyter_notebook_config.py /opt/conda/etc/jupyter/
 # rstudio server config
 COPY ./config/rstudio-prefs.json /etc/rstudio/
 # COPY ./config/rserver.conf /etc/rstudio/
-# kernel available to jupyter / Rprofile.site setting
+# R kernel available to jupyter 
+# R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
 RUN R --quiet -e "IRkernel::installspec(user=FALSE)" &&\
     echo 'options(repos = c(CRAN = "https://cran.rstudio.com/", CRANextra = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
-    echo '.First <- function() {reticulate::use_python("/opt/conda/bin/python");}' >> /opt/conda/lib/R/etc/Rprofile.site 
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron
 
 
 # modify r/py folder permissions

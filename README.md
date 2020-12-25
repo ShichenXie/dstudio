@@ -12,7 +12,7 @@ dstudio 是一个将 rstudio server 和 jupyter notebook 打包在一起的 dock
 
 首先需要配置 docker 环境，其安装过程参见[docker 在线文档](https://docs.docker.com/get-started/)。
 
-安装好 docker 之后，需要在电脑上新建文件夹作为 docker 容器指向的用户目录。即在该文件夹存储 dstudio 的用户文件，否则 docker 容器删除之后，用户的建模分析结果就会丢失了。
+安装好 docker 之后，需要在电脑上新建文件夹作为 docker 容器指向的用户目录。即在该文件夹存储建模平台的用户文件，否则 docker 容器删除之后，用户的建模分析结果就会丢失了。
 ```
 mkdir -p $HOME/docker/dstudio_home/dstudio
 ```
@@ -47,9 +47,11 @@ useradd -m -g users -G ds -d /home/test test
 类似的项目有 [ShinyStudio](https://github.com/dm3ll3n/ShinyStudio)，不过是基于  [shinyproxy](https://www.shinyproxy.io/) 开发的。
 
 本项目参考了以下内容或项目：
+- [Docker — 从入门到实践](https://yeasy.gitbook.io/docker_practice/)
 - [A Docker tutorial for reproducible research.](http://ropenscilabs.github.io/r-docker-tutorial/)
 - [JupyterHub](https://jupyter.org/hub)
 - [JupyterHub Native Authenticator](https://native-authenticator.readthedocs.io/en/latest/)
 - [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy)
 - [RStudio Server Pro - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
 - [Version-stable Rocker images](https://github.com/rocker-org/rocker-versioned)
+
