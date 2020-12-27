@@ -97,7 +97,7 @@ COPY ./config/rstudio-prefs.json /etc/rstudio/
 # R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
 RUN R --quiet -e "IRkernel::installspec(user=FALSE)" &&\
     echo 'options(repos = c(CRAN = "https://cran.rstudio.com/", CRANextra = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
-    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site
 
 
 # modify r/py folder permissions
