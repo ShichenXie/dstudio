@@ -117,4 +117,4 @@ CMD jupyterhub
 
 # docker build -t shichenxie/dstudio:0.1.1 .
 # mkdir -p $HOME/docker/dstudio_home
-# docker run -d -p 8888:8888 -v $HOME/docker/dstudio_home:/home --restart=always --name dstudio shichenxie/dstudio:0.1.1
+# docker run -d -p 8888:8888 -v $HOME/docker/dstudio_home:/home --restart always --name dstudio shichenxie/dstudio:0.1.1
