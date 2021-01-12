@@ -1,0 +1,37 @@
+FROM jupyter/datascience-notebook:hub-1.2.2
+
+WORKDIR /
+USER root
+# set local source.list
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
+
+
+# rstudio
+RUN apt-get update &&\
+    apt-get install -y gdebi-core &&\
+    wget https://download2.rstudio.org/server/bionic/amd64/rstudio-server-1.2.5042-amd64.deb &&\
+    gdebi --non-interactive rstudio-server-1.2.5042-amd64.deb &&\
+    rm rstudio-server-1.2.5042-amd64.deb &&\
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV PATH=$PATH:/usr/lib/rstudio-server/bin
+
+# R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
+RUN echo 'options(repos = c(CRAN = "https://cran.rstudio.com/", CRANextra = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site
+
+
+USER $NB_UID
+# rstudio proxy in treeView
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
+        jupyter-rsession-proxy
+# install r pkgs
+RUN R --quiet -e "install.packages(c('png', 'reticulate'))"
+
+# Add conda env hook
+COPY ./conda-activate.sh /usr/local/bin/before-notebook.d/
+
+WORKDIR $HOME
+
+# docker build -t shichenxie/dstudio_lab:ds -f Dockerfile_labds .

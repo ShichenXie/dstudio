@@ -1,0 +1,16 @@
+debug = true
+
+logLevel = "ERROR"
+defaultEntryPoints = ["http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+[docker]
+domain = "docker.local"
+watch = true
+
+[api]
+  [api.statistics]
+    recentErrors = 10

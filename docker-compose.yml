@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  jupyterhub:
+    image: shichenxie/dstudio_hub:1.2.2
+    container_name: jupyterhub
+    hostname: jupyterhub
+    # Permit communication with the host's docker server
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - hub_net
+    ports:
+      - "8000:8000"
+    environment:
+      DOCKER_NETWORK_NAME: dstudio_hub_net
+      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds
+      DOCKER_NOTEBOOK_DIR: /home/jovyan/work
+      HOST_NOTEBOOK_DIR: $HOME/docker/dstudio_home
+    restart: always
+
+  # reverse-proxy:
+  #   image: traefik
+  #   container_name: reverse-proxy
+  #   ports:
+  #     - "80:80"
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   restart: always
+    
+networks:
+  hub_net:
+     driver: bridge
+
+
+
