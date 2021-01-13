@@ -21,9 +21,9 @@ c = get_config()
 # c.JupyterHub.ip = '0.0.0.0'
 # c.JupyterHub.port = 8888
 
-# from jupyter_client.localinterfaces import public_ips
-# c.JupyterHub.hub_ip = public_ips()[0]
-c.JupyterHub.hub_ip = 'jupyterhub'
+from jupyter_client.localinterfaces import public_ips
+c.JupyterHub.hub_ip = public_ips()[0]
+# c.JupyterHub.hub_ip = 'jupyterhub'
 # c.JupyterHub.hub_port = 8888
 
 c.JupyterHub.statsd_prefix = 'jupyterhub'

@@ -9,16 +9,16 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
-      - hub_net
+      - dstudio_net
     ports:
       - "8000:8000"
     environment:
-      DOCKER_NETWORK_NAME: dstudio_hub_net
+      DOCKER_NETWORK_NAME: dstudio_net
       DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds
       DOCKER_NOTEBOOK_DIR: /home/jovyan/work
       HOST_NOTEBOOK_DIR: $HOME/docker/dstudio_home
     restart: always
-
+    
   # reverse-proxy:
   #   image: traefik
   #   container_name: reverse-proxy
@@ -31,8 +31,9 @@ services:
   #   restart: always
     
 networks:
-  hub_net:
+  dstudio_net:
      driver: bridge
-
+     name: dstudio_net
+    
 
 
