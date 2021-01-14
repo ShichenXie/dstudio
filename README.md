@@ -12,12 +12,7 @@ dstudio 是一个将 rstudio server 和 jupyterlab 打包在一起的 docker 容
 
 首先需要配置 docker 环境，其安装过程参见[docker 在线文档](https://docs.docker.com/get-started/)。
 
-安装好 docker 之后，需要在电脑上新建文件夹作为 docker 容器指向的用户目录。即在该文件夹存储建模平台的用户文件，否则 docker 容器删除之后，用户的建模分析结果就会丢失了。该文件路径是通过 docker-compose.yml 中的 HOST_NOTEBOOK_DIR 同步到容器中的，如果希望自定义存储文件的路径，需要更新对应的值。
-```
-mkdir -p $HOME/docker/dstudio_home
-```
-
-然后下载本项目 repo，在终端中进入本项目文件夹并运行以下代码，就可以通过浏览器访问 rstudio server 和 jupyterlab 了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址。
+安装好 docker 之后下载本项目 repo，在终端中进入本项目文件夹并运行以下代码，就可以通过浏览器访问 rstudio server 和 jupyterlab 了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址。
 ```
 docker pull shichenxie/dstudio_lab:ds
 docker-compose up -d
@@ -38,12 +33,11 @@ docker-compose up -d
 
 用原密码登陆之后，进入 `http://localhost:8000/hub/change-password` 页面可以更新密码。
 
-# 贡献与参考
+## 贡献与参考
 
 如果您对本项目感兴趣，欢迎star。如果有任何想法可以提交 issue 或者 pr。
 
 本项目适合中小型团队搭建在线建模分析平台，参考了 [defeo/jupyterhub-docker](https://github.com/defeo/jupyterhub-docker) 与 [jupyterhub/jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker)；对于大型团队需要集群扩展的可以参考 [zero-to-jupyterhub-k8s](https://zero-to-jupyterhub.readthedocs.io/en/stable/) 项目。
-
 类似的项目还有 [ShinyStudio](https://github.com/dm3ll3n/ShinyStudio)，不过是基于  [shinyproxy](https://www.shinyproxy.io/) 开发的。
 
 本项目参考了以下内容或项目：
