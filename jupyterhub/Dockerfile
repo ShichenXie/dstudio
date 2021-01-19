@@ -14,10 +14,13 @@ RUN pip install /tmp/nativeauthenticator &&\
     rm -rf /tmp/*
 
 # config -----------------------------------------------------------------#
-WORKDIR /
 USER root
-RUN mkdir -p /srv/jupyterhub/
-COPY ./jupyterhub_config.py /srv/jupyterhub/jupyterhub_config.py
+RUN mkdir -p /srv/jupyterhub/ &&\
+    mkdir -p /opt/jupyterhub/
+WORKDIR /srv/jupyterhub
 
 # EXPOSE 8888
-CMD ["jupyterhub", "-f", "/srv/jupyterhub/jupyterhub_config.py"]
+COPY ./jupyterhub_config.py /opt/jupyterhub/jupyterhub_config.py
+CMD ["jupyterhub", "-f", "/opt/jupyterhub/jupyterhub_config.py"]
+
+# docker build -t shichenxie/dstudio_hubb:1.2.2 .

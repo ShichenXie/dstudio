@@ -2,37 +2,36 @@ version: '3.5'
 
 services:
   jupyterhub:
+    # build: jupyterhub
     image: shichenxie/dstudio_hub:1.2.2
     container_name: jupyterhub
     # Permit communication with the host's docker server
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "jupyterhub_data:/srv/jupyterhub"
     networks:
       - dstudio_net
     ports:
       - "8000:8000"
     environment:
       DOCKER_NETWORK_NAME: dstudio_net
-      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds
+      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:shiny
+      HUB_DEFAULT_URL: /lab
       # User containers will access hub by container name on the Docker network
       HUB_IP: jupyterhub
     restart: always
-    
-  # reverse-proxy:
-  #   image: traefik
-  #   container_name: reverse-proxy
-  #   ports:
-  #     - "80:80"
-  #     - "8080:8080"
-  #   volumes:
-  #     - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   restart: always
-    
+  # jupyterlab:
+  #   build: jupyterlab
+  #   image: shichenxie/dstudio_lab:ds
+  #   network_mode: none
+  #   command: echo
+  
 networks:
   dstudio_net:
      driver: bridge
      name: dstudio_net
-    
-
+     
+volumes:
+  jupyterhub_data:
+    name: jupyterhub_data
 

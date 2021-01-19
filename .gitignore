@@ -3,4 +3,4 @@
 .RData
 .Ruserdata
 binder.Rproj
-DockerRocker_BF/*
+jupyterlab/Dockerfile_labfd

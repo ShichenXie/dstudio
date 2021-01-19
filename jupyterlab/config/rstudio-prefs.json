@@ -1,5 +1,5 @@
 {
-    "show_terminal_tab": false,
+    "show_terminal_tab": true,
     "editor_theme": "Cobalt",
     "soft_wrap_r_files": true
 }

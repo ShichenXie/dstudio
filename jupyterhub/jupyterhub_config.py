@@ -12,22 +12,22 @@ c = get_config()
 ## Docker spawner
 c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
 c.DockerSpawner.image = os.environ['DOCKER_JUPYTERLAB_IMAGE']
-# # JupyterHub requires a single-user instance of the Notebook server
-DOCKER_SPAWN_CMD="start-singleuser.sh --SingleUserNotebookApp.default_url=/lab"
-c.DockerSpawner.extra_create_kwargs.update({'command': DOCKER_SPAWN_CMD})
 # Connect containers to this Docker network
 network_name = os.environ['DOCKER_NETWORK_NAME']
 c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.network_name = network_name
 c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
 # Remove containers once they are stopped
-c.DockerSpawner.remove_containers = True
+c.DockerSpawner.remove = True
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
+c.DockerSpawner.cmd = 'start-singleuser.sh'
+c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
 
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
-notebook_dir = os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
+notebook_dir = '/home/jovyan/work' 
+# os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work' 
 c.DockerSpawner.notebook_dir = notebook_dir
 # c.DockerSpawner.volumes = {os.environ['HOST_NOTEBOOK_DIR']+'/{username}': {"bind": notebook_dir, "mode": "rw"}}
 c.DockerSpawner.volumes = { 'jupyterhub-user-{username}': notebook_dir }

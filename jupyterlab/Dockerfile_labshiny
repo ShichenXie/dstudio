@@ -1,0 +1,38 @@
+FROM shichenxie/dstudio_lab:ds
+
+# install shiny server ------------------
+WORKDIR /
+USER root
+
+# https://github.com/rocker-org/shiny
+RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION -O "version.txt" && \
+    VERSION=$(cat version.txt)  && \
+    wget --no-verbose "https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
+    gdebi -n ss-latest.deb && \
+    rm -f version.txt ss-latest.deb && \
+    . /etc/environment && \
+    cp -R /opt/conda/lib/R/library/shiny/examples/* /srv/shiny-server/ && \
+    chown $NB_UID:$NB_UID /srv/shiny-server/ && \
+    chown shiny:shiny /var/lib/shiny-server 
+
+EXPOSE 3838
+COPY ./shiny/shiny-server.sh /usr/bin/shiny-server.sh
+CMD ["/usr/bin/shiny-server.sh"]
+
+
+# pkgs ------------------
+# jupyter-shiny-proxy
+ADD ./shiny/jupyter_shiny_proxy /tmp/jupyter_shiny_proxy
+RUN pip install /tmp/jupyter_shiny_proxy && \
+    rm -rf /tmp/*
+    
+# shiny pkgs
+RUN R --quiet -e "install.packages(c('shinythemes', 'shinydashboard'), repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')" && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+    
+WORKDIR $HOME
+USER $NB_UID
+
+# docker build -t shichenxie/dstudio_lab:shiny -f Dockerfile_labshiny .
