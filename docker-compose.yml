@@ -15,8 +15,11 @@ services:
       - "8000:8000"
     environment:
       DOCKER_NETWORK_NAME: dstudio_net
-      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:shiny
+      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds
+      HOST_WORK_DIR: 
+      LAB_SHARE_DIR: /home/jovyan/work/share
       HUB_DEFAULT_URL: /lab
+      HUB_ADMIN_USER: dstudio
       # User containers will access hub by container name on the Docker network
       HUB_IP: jupyterhub
     restart: always

@@ -4,3 +4,4 @@
 .Ruserdata
 binder.Rproj
 jupyterlab/Dockerfile_labfd
+zyfd/*

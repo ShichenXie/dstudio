@@ -48,4 +48,5 @@ docker-compose up -d
 - [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy)
 - [RStudio Server Pro - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
 - [Version-stable Rocker images](https://github.com/rocker-org/rocker-versioned)
+- [traefik-book](https://www.qikqiak.com/traefik-book/), [traefik-proxy](https://jupyterhub-traefik-proxy.readthedocs.io/en/latest/install.html)
 

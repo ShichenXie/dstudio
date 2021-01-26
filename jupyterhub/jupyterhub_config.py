@@ -26,11 +26,17 @@ c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
 
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
-notebook_dir = '/home/jovyan/work' 
-# os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work' 
-c.DockerSpawner.notebook_dir = notebook_dir
-# c.DockerSpawner.volumes = {os.environ['HOST_NOTEBOOK_DIR']+'/{username}': {"bind": notebook_dir, "mode": "rw"}}
-c.DockerSpawner.volumes = { 'jupyterhub-user-{username}': notebook_dir }
+lab_work_dir = '/home/jovyan/work' # os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
+c.DockerSpawner.notebook_dir = lab_work_dir
+
+volumes_dict = {}
+if 'HOST_WORK_DIR' in list(os.environ):
+  volumes_dict[os.environ['HOST_WORK_DIR']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
+else:
+  volumes_dict['jupyterlab-user-{username}'] = lab_work_dir
+if 'LAB_SHARE_DIR' in list(os.environ):
+  volumes_dict['jupyterlab-share'] = os.environ['LAB_SHARE_DIR']
+c.DockerSpawner.volumes = volumes_dict
 
 
 ## Generic
@@ -49,7 +55,7 @@ c.JupyterHub.hub_port = 8888
 c.JupyterHub.authenticator_class = LocalNativeAuthenticator
 c.LocalAuthenticator.create_system_users = True
 c.LocalAuthenticator.group_whitelist = {'ds'}
-c.Authenticator.admin_users = {'dstudio'}
+c.Authenticator.admin_users = {os.environ['HUB_ADMIN_USER']}
 # c.Authenticator.whitelist = {'ds'}
 c.Authenticator.check_common_password = True
 c.Authenticator.minimum_password_length = 6
