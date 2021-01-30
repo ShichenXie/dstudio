@@ -6,11 +6,12 @@ USER root
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
 COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
 
-
-# rstudio server # 1.2.5042 # 1.3.959 # 1.4.1103
+# java rstudio server # 1.2.5042 # 1.3.959 # 1.4.1103
 ARG RSTUDIO_VERSION=1.3.959
 RUN apt-get update && \
-    apt-get install -y gdebi-core && \
+    apt-get install -y \
+        default-jdk \
+        gdebi-core && \
     wget https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb -O /tmp/rstudio.deb && \
     gdebi --non-interactive /tmp/rstudio.deb && \
     rm /tmp/rstudio.deb && \
@@ -36,7 +37,8 @@ RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir \
 # install r pkgs
 RUN R --quiet -e "install.packages(c('png', 'reticulate'))"
 
-RUN mkdir -p /home/jovyan/work/share
+RUN mkdir -p /home/jovyan/share && \
+    ln -s /home/jovyan/share /home/jovyan/work/share
 WORKDIR $HOME
 
 # docker build -t shichenxie/dstudio_lab:ds -f Dockerfile_labds .

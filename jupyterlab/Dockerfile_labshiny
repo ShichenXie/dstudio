@@ -15,7 +15,6 @@ RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION 
     chown $NB_UID:$NB_UID /srv/shiny-server/ && \
     chown shiny:shiny /var/lib/shiny-server 
 
-EXPOSE 3838
 COPY ./shiny/shiny-server.sh /usr/bin/shiny-server.sh
 CMD ["/usr/bin/shiny-server.sh"]
 

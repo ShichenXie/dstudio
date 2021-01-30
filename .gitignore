@@ -2,6 +2,4 @@
 .Rhistory
 .RData
 .Ruserdata
-binder.Rproj
-jupyterlab/Dockerfile_labfd
-zyfd/*
+xie/*

@@ -27,15 +27,14 @@ c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
 lab_work_dir = '/home/jovyan/work' # os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
+lab_share_dir = '/home/jovyan/share'
 c.DockerSpawner.notebook_dir = lab_work_dir
 
-volumes_dict = {}
+volumes_dict = {'jupyterlab-share': lab_share_dir}
 if 'HOST_WORK_DIR' in list(os.environ):
   volumes_dict[os.environ['HOST_WORK_DIR']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
 else:
   volumes_dict['jupyterlab-user-{username}'] = lab_work_dir
-if 'LAB_SHARE_DIR' in list(os.environ):
-  volumes_dict['jupyterlab-share'] = os.environ['LAB_SHARE_DIR']
 c.DockerSpawner.volumes = volumes_dict
 
 

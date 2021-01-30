@@ -2,8 +2,8 @@ FROM jupyterhub/jupyterhub:1.2.2
 
 # pkgs
 RUN python3 -m pip install --no-cache \
-	jupyter_client==6.1.11 \
-    dockerspawner==0.11.1 \
+	jupyter_client \
+    dockerspawner \
     jupyterhub-idle-culler &&\
     rm -rf /tmp/*
 
