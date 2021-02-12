@@ -1,0 +1,124 @@
+FROM jupyter/scipy-notebook:d113a601dbb8
+
+WORKDIR /
+USER root
+# set local source.list
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
+
+# r ------------------ 
+ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN
+ARG R_HOME=/usr/lib/R
+ENV R_LIB=/usr/local/lib/R/site-library
+ENV PATH=${R_HOME}/bin:$PATH
+
+RUN apt-get update && \
+    apt-get install -y dirmngr gnupg apt-transport-https ca-certificates software-properties-common && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 && \
+    echo 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/' >> /etc/apt/sources.list
+    
+RUN apt-get update && \
+    apt-get install -y r-base r-base-dev && \
+    chown -R $NB_UID ${R_LIB} && \
+    chmod -R 775 ${R_LIB}
+
+# java rstudio server ------------------ 
+# 1.2.5042 # 1.3.959 # 1.4.1103
+ARG RSTUDIO_VERSION=1.4.1103
+RUN apt-get update && \
+    apt-get install -y \
+        default-jdk \
+        gdebi-core && \
+    wget https://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb -O /tmp/rstudio.deb && \
+    gdebi --non-interactive /tmp/rstudio.deb && \
+    rm /tmp/rstudio.deb && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+    
+ENV PATH=/usr/lib/rstudio-server/bin:$PATH
+
+# install shiny server ------------------
+# https://github.com/rocker-org/shiny
+RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION -O "version.txt" && \
+    VERSION=$(cat version.txt)  && \
+    wget --no-verbose "https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-$VERSION-amd64.deb" -O ss-latest.deb && \
+    gdebi -n ss-latest.deb && \
+    rm -f version.txt ss-latest.deb && \
+    . /etc/environment && \
+    R -e "install.packages(c('shiny', 'rmarkdown'), repos='${CRAN_URL}')" && \
+    cp -R ${R_LIB}/shiny/examples/* /srv/shiny-server/ && \
+    chown -R $NB_UID /srv/shiny-server/ && \
+    chown -R $NB_UID /var/lib/shiny-server 
+
+# COPY ./config/shiny-server.sh /usr/bin/shiny-server.sh
+# CMD ["/usr/bin/shiny-server.sh"]
+
+# pkgs ------------------
+# r pkgs 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \ 
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libfontconfig1-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    unixodbc-dev
+    
+RUN R --quiet -e "install.packages(c('png', 'reticulate', 'IRkernel', \
+        'RCurl', 'devtools', 'tidyverse', \
+        'odbc', 'RJDBC', 'RSQLite', \
+        'mlr3', 'scorecard'), \
+        repos='${CRAN_URL}', dependencies = TRUE)" && \ 
+    rm -rf /tmp/* && \
+    chmod -R 775 ${R_LIB} 
+
+# py pkgs 
+RUN conda install --quiet --yes \
+    'jupyterhub=1.2.2' \
+    'JayDeBeApi' && \
+    conda clean --all -f -y && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+    
+ENV RSESSION_PROXY_RSTUDIO_1_4=yes
+ADD ./pkgs-jupyter-rstudioshiny  /tmp
+RUN python3 -m pip install \
+        -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache \
+        rpy2 pyodbc && \
+    python3 -m pip install /tmp/jupyter_shiny_proxy && \ 
+    python3 -m pip install /tmp/jupyter-rsession-proxy && \ 
+    rm -rf /tmp/* && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions "/home/${NB_USER}" 
+
+# startup ------------------
+RUN chown -R $NB_UID /etc/R && \
+    chown -R $NB_UID /etc/rstudio
+    
+USER $NB_UID
+# R startup 
+# https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
+RUN R --quiet -e "IRkernel::installspec()" && \
+    echo 'options(repos = c(CRAN = "https://cran.rstudio.com/", CRANextra = "https://mirrors.tuna.tsinghua.edu.cn/CRAN"))' >> /etc/R/Rprofile.site && \
+    echo "R_LIBS_SITE=${R_LIBS_SITE-'/usr/local/lib/R/site-library:/usr/lib/R/site-library:/usr/lib/R/library'}" >> /etc/R/Renviron.site && \
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /etc/R/Renviron.site
+
+# rstudio server config
+RUN echo 'session-default-working-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf && \
+    echo 'session-default-new-project-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf
+COPY ./config/rstudio-prefs.json /etc/rstudio/rstudio-prefs.json
+  
+RUN mkdir -p /home/jovyan/share && \
+    ln -s /home/jovyan/share /home/jovyan/work/share
+    
+WORKDIR $HOME
+USER $NB_UID
+
+# docker build -t shichenxie/dstudio_lab:ds -f Dockerfile_labds_rpy .
+
+# fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
+# RUN conda remove --force -y openssl
