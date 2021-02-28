@@ -23,8 +23,8 @@ RUN apt-get update && \
     chmod -R 775 ${R_LIB}
 
 # java rstudio server ------------------ 
-# 1.2.5042 # 1.3.959 # 1.4.1103
-ARG RSTUDIO_VERSION=1.4.1103
+# 1.2.5042 # 1.3.959 # 1.4.1106
+ARG RSTUDIO_VERSION=1.4.1106
 RUN apt-get update && \
     apt-get install -y \
         default-jdk \
@@ -46,6 +46,8 @@ RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION 
     . /etc/environment && \
     R -e "install.packages(c('shiny', 'rmarkdown'), repos='${CRAN_URL}')" && \
     cp -R ${R_LIB}/shiny/examples/* /srv/shiny-server/ && \
+    chown -R $NB_UID ${R_LIB} && \
+    chmod -R 775 ${R_LIB}  && \
     chown -R $NB_UID /srv/shiny-server/ && \
     chown -R $NB_UID /var/lib/shiny-server 
 
@@ -56,24 +58,26 @@ RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION 
 # r pkgs 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \ 
-    libxml2-dev \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libfontconfig1-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-    unixodbc-dev
-    
+      libxml2-dev \
+      libcurl4-openssl-dev \
+      libssl-dev \
+      libfontconfig1-dev \
+      libharfbuzz-dev \
+      libfribidi-dev \
+      libfreetype6-dev \
+      libpng-dev \
+      libtiff5-dev \
+      libjpeg-dev \
+      unixodbc-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 RUN R --quiet -e "install.packages(c('png', 'reticulate', 'IRkernel', \
         'RCurl', 'devtools', 'tidyverse', \
         'odbc', 'RJDBC', 'RSQLite', \
         'mlr3', 'scorecard'), \
         repos='${CRAN_URL}', dependencies = TRUE)" && \ 
     rm -rf /tmp/* && \
+    chown -R $NB_UID ${R_LIB} && \
     chmod -R 775 ${R_LIB} 
 
 # py pkgs 

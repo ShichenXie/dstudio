@@ -34,7 +34,7 @@ docker-compose up -d
 ![jupyter](./img/jupyter.png)
 ![rstudio](./img/rstudio.png)
 
-### 创建新用户
+### 新建用户
 
 先在登陆页面 `http://localhost:8000/` 点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面进行审批，即完成了新用户的创建。
 
