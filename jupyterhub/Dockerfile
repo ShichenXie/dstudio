@@ -1,4 +1,4 @@
-FROM jupyterhub/jupyterhub:1.2.2
+FROM jupyterhub/jupyterhub:1.3.0
 
 # pkgs
 RUN python3 -m pip install --no-cache \
