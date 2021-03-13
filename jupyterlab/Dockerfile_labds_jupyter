@@ -37,11 +37,11 @@ RUN /rocker_scripts/install_rstudio.sh && \
 # pkgs ------------------
 # py pgks
 ENV RSESSION_PROXY_RSTUDIO_1_4=yes
-# python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
-# python3 -m pip install --upgrade https://github.com/ryanlovett/jupyter-shiny-proxy/tarball/master &&\
-ADD ./pkgs-jupyter-rstudioshiny  /tmp
-RUN python3 -m pip install /tmp/jupyter-rsession-proxy && \ 
-    python3 -m pip install /tmp/jupyter_shiny_proxy && \ 
+RUN python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
+    python3 -m pip install jupyter-shiny-proxy && \ 
+        cd /opt/conda/lib/python3.8/site-packages/jupyter_shiny_proxy &&  \
+        awk '{sub(/os.getcwd\(\)/,"\"/srv/shiny-server\"")}1' __init__.py > /tmp/temp.py && mv /tmp/temp.py __init__.py && \ 
+        cd / && \
     python3 -m pip install datatable && \ 
     rm -rf /tmp/* && \
     ## conda install
