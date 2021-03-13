@@ -8,9 +8,7 @@ RUN python3 -m pip install --no-cache \
     rm -rf /tmp/*
 
 # nativeauthenticator
-# RUN git clone https://github.com/jupyterhub/nativeauthenticator.git /tmp/nativeauthenticator
-COPY ./nativeauthenticator /tmp/nativeauthenticator
-RUN pip install /tmp/nativeauthenticator &&\
+RUN python3 -m pip install --upgrade https://github.com/jupyterhub/nativeauthenticator/tarball/master &&\
     rm -rf /tmp/*
 
 # config -----------------------------------------------------------------#
@@ -23,5 +21,5 @@ WORKDIR /srv/jupyterhub
 COPY ./jupyterhub_config.py /opt/jupyterhub/jupyterhub_config.py
 CMD ["jupyterhub", "-f", "/opt/jupyterhub/jupyterhub_config.py"]
 
-# docker build -t shichenxie/dstudio_hub:1.2.2 .
+# docker build -t shichenxie/dstudio_hub:1.3.0 .
 # docker save shichenxie/dstudio_hub:1.2.2 -o ~/Downloads/dstudio_hub.tar
