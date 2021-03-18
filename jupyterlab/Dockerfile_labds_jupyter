@@ -6,11 +6,6 @@ USER root
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
 COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
 
-# java pandoc ------------------
-RUN apt-get update && \
-    apt-get install -y default-jdk pandoc && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # rstudio server / shiny ------------------ 
 COPY scripts /rocker_scripts
 
@@ -38,11 +33,12 @@ RUN /rocker_scripts/install_rstudio.sh && \
 # py pgks
 ENV RSESSION_PROXY_RSTUDIO_1_4=yes
 RUN python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
-    python3 -m pip install jupyter-shiny-proxy && \ 
+    python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache \
+        datatable \
+        jupyter-shiny-proxy && \ 
         cd /opt/conda/lib/python3.8/site-packages/jupyter_shiny_proxy &&  \
         awk '{sub(/os.getcwd\(\)/,"\"/srv/shiny-server\"")}1' __init__.py > /tmp/temp.py && mv /tmp/temp.py __init__.py && \ 
         cd / && \
-    python3 -m pip install datatable && \ 
     rm -rf /tmp/* && \
     ## conda install
     conda install --quiet --yes 'JayDeBeApi' && \
@@ -51,13 +47,20 @@ RUN python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsess
     fix-permissions "/home/${NB_USER}"
 
 # r pkgs 
-RUN conda install --quiet --yes \
+RUN apt-get update && \
+    apt-get install -y \
+        qpdf \
+        default-jdk && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    # conda install r pkgs
+    conda install --quiet --yes \
         'r-png' 'r-reticulate' \
         'r-odbc' 'r-rjdbc' 'r-rpostgres' \
-        'r-mlr3' 'r-scorecard' && \
+        'r-mlr3' 'r-scorecard' \
+        'r-pkgdown' && \
     conda clean --all -f -y && \
-    ## R install.packages
-    ## R --quiet -e "install.packages(c('mlr3', 'scorecard'), repos='${CRAN_URL}')"  && \ 
+    ## install.packages r pkgs
+    R --quiet -e "install.packages(c('RClickhouse', 'blogdown'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
@@ -82,7 +85,7 @@ RUN mkdir -p /home/jovyan/share && \
 WORKDIR $HOME
 USER $NB_UID
 
-# docker build -t shichenxie/dstudio_lab:ds1.3.0 -f Dockerfile_labds_jupyter .
+# docker build -t shichenxie/dstudio_lab:ds1.3.02 -f Dockerfile_labds_jupyter2 .
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
 # RUN conda remove --force -y openssl
