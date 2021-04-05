@@ -50,6 +50,7 @@ RUN python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsess
 RUN apt-get update && \
     apt-get install -y \
         qpdf \
+        cron \
         default-jdk && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     # conda install r pkgs
@@ -57,14 +58,21 @@ RUN apt-get update && \
         'r-png' 'r-reticulate' \
         'r-odbc' 'r-rjdbc' 'r-rpostgres' \
         'r-mlr3' 'r-scorecard' \
-        'r-pkgdown' && \
+        'r-pkgdown' 'r-blogdown' && \
     conda clean --all -f -y && \
     ## install.packages r pkgs
-    R --quiet -e "install.packages(c('RClickhouse', 'blogdown'), repos='${CRAN_URL}')"  && \ 
+    R --quiet -e "install.packages(c('RClickhouse', 'cronR', 'blastula', 'rjson'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
-    
+
+RUN R --quiet -e "install.packages(c( \
+        'shinythemes', 'shinydashboard', 'shinydashboardPlus', 'bs4Dash', 'shinyWidgets', 'shinycssloaders', 'shinyBS', 'shiny.i18n', \
+        'leaflet', 'leaflet.minicharts', \
+        'plotly', 'echarts4r', 'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
 
 # startup ------------------
 # R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
@@ -85,7 +93,7 @@ RUN mkdir -p /home/jovyan/share && \
 WORKDIR $HOME
 USER $NB_UID
 
-# docker build -t shichenxie/dstudio_lab:ds1.3.02 -f Dockerfile_labds_jupyter2 .
+# docker build -t shichenxie/dstudio_lab:ds1.3.0 -f Dockerfile_labds_jupyter .
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
 # RUN conda remove --force -y openssl

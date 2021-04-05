@@ -18,7 +18,7 @@ c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.network_name = network_name
 c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
 # Remove containers once they are stopped
-c.DockerSpawner.remove = True
+c.DockerSpawner.remove = bool(os.environ['DOCKER_SPAWNER_REMOVE'])
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
 c.DockerSpawner.cmd = 'start-singleuser.sh'
