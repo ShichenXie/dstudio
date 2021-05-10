@@ -16,9 +16,7 @@ services:
     environment:
       DOCKER_NETWORK_NAME: dstudio_net
       DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds1.3.0
-      # Remove containers once they are stopped
-      DOCKER_SPAWNER_REMOVE: "true"
-      HOST_WORK_DIR: 
+      CONTAINER_JUPYTERLAB_REMOVE: T
       HUB_DEFAULT_URL: /lab
       HUB_ADMIN_USER: dstudio
       # User containers will access hub by container name on the Docker network

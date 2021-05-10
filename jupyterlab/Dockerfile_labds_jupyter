@@ -23,9 +23,9 @@ RUN /rocker_scripts/install_rstudio.sh && \
     /rocker_scripts/install_pandoc.sh && \
     /rocker_scripts/install_shiny_server.sh && \
     ## folder permission
-    chown $NB_UID:$NB_UID /srv/shiny-server/ && \
-    chown $NB_UID:$NB_UID /var/lib/shiny-server && \
-    chown $NB_UID:$NB_UID /var/log/shiny-server && \
+    chown -R $NB_UID:$NB_UID /srv/shiny-server/ && \
+    chown -R $NB_UID:$NB_UID /var/lib/shiny-server && \
+    chown -R $NB_UID:$NB_UID /var/log/shiny-server && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 

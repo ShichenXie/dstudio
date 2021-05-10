@@ -17,12 +17,16 @@ network_name = os.environ['DOCKER_NETWORK_NAME']
 c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.network_name = network_name
 c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
-# Remove containers once they are stopped
-c.DockerSpawner.remove = bool(os.environ['DOCKER_SPAWNER_REMOVE'])
+# Remove container once they are stopped
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
+rmcont = str2bool(os.environ['CONTAINER_JUPYTERLAB_REMOVE']) if 'CONTAINER_JUPYTERLAB_REMOVE' in list(os.environ) else True
+c.DockerSpawner.remove = rmcont
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
 c.DockerSpawner.cmd = 'start-singleuser.sh'
 c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
+
 
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
@@ -72,6 +76,6 @@ c.JupyterHub.services = [
     {
         'name': 'idle-culler',
         'admin': True,
-        'command': [sys.executable, '-m', 'jupyterhub_idle_culler', '--timeout=3600'],
+        'command': [sys.executable, '-m', 'jupyterhub_idle_culler', '--timeout=90000'],
     }
 ]
