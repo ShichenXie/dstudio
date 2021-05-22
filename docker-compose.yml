@@ -15,7 +15,7 @@ services:
       - "8000:8000"
     environment:
       DOCKER_NETWORK_NAME: dstudio_net
-      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds1.3.0
+      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds1.3.0xie
       CONTAINER_JUPYTERLAB_REMOVE: T
       HUB_DEFAULT_URL: /lab
       HUB_ADMIN_USER: dstudio
