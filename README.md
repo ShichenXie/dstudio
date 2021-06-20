@@ -18,8 +18,8 @@ dstudio 是一个将 rstudio server 和 jupyterlab 打包在一起的 docker 容
 curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml
 
 # 下载 dstudio_hub 和 dstudio_lab image
-docker pull shichenxie/dstudio_hub:1.3.0
-docker pull shichenxie/dstudio_lab:ds1.3.0
+docker pull shichenxie/dstudio_hub:1.4.1
+docker pull shichenxie/dstudio_lab:ds1.4.1
 
 # 启动服务
 docker-compose up -d
