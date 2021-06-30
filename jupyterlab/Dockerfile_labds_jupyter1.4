@@ -36,7 +36,8 @@ ENV RSESSION_PROXY_RSTUDIO_1_4=yes
 RUN conda install --quiet --yes pip && \
     python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
     python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache \
-        datatable \
+        xgboost \
+        sklearn2pmml \
         jupyter-shiny-proxy && \ 
     rm -rf /tmp/* && \
     ## conda install
@@ -60,7 +61,7 @@ RUN apt-get update && \
         'r-pkgdown' 'r-blogdown' && \
     conda clean --all -f -y && \
     ## install.packages r pkgs
-    R --quiet -e "install.packages(c('RClickhouse', 'cronR', 'blastula', 'rjson'), repos='${CRAN_URL}')"  && \ 
+    R --quiet -e "install.packages(c('RClickhouse', 'cronR', 'blastula', 'rjson', 'xgboost'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
