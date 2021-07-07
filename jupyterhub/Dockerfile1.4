@@ -2,10 +2,11 @@ FROM jupyterhub/jupyterhub:1.4.1
 # https://hub.docker.com/layers/jupyterhub/jupyterhub
 
 # pkgs
-RUN python3 -m pip install --no-cache \
-	jupyter_client \
-    dockerspawner \
-    jupyterhub-idle-culler &&\
+RUN python3 -m pip install --upgrade --no-cache pip && \
+    python3 -m pip install --no-cache \
+	   jupyter_client \
+       dockerspawner \
+       jupyterhub-idle-culler &&\
     rm -rf /tmp/*
 
 # nativeauthenticator
