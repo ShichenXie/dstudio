@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook:hub-1.4.1
+FROM jupyter/datascience-notebook:hub-1.4.2
 # https://hub.docker.com/r/jupyter/datascience-notebook/
 
 WORKDIR /
@@ -61,7 +61,7 @@ RUN apt-get update && \
         'r-pkgdown' 'r-blogdown' && \
     conda clean --all -f -y && \
     ## install.packages r pkgs
-    R --quiet -e "install.packages(c('RClickhouse', 'cronR', 'blastula', 'rjson', 'xgboost'), repos='${CRAN_URL}')"  && \ 
+    R --quiet -e "install.packages(c('RClickhouse', 'cronR', 'blastula', 'rjson', 'xgboost', 'tsibble', 'fable'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
@@ -98,7 +98,7 @@ RUN mkdir -p /home/jovyan/share && \
 WORKDIR $HOME
 USER $NB_UID
 
-# docker build -t shichenxie/dstudio_lab:ds1.4.1 -f Dockerfile_labds_jupyter1.4 .
+# docker build -t shichenxie/dstudio_lab:ds1.4.2 -f Dockerfile_labds_jupyter1.4 .
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
 # RUN conda remove --force -y openssl
