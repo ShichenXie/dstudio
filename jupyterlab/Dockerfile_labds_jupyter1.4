@@ -41,12 +41,13 @@ RUN conda install --quiet --yes pip && \
         jupyter-shiny-proxy && \ 
     rm -rf /tmp/* && \
     ## conda install
-    conda install --quiet --yes 'JayDeBeApi' && \
+    conda install --quiet --yes 'JayDeBeApi' 'openpyxl' && \
     conda clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
 # r pkgs 
+# r-dbi https://github.com/r-dbi # service cron start
 RUN apt-get update && \
     apt-get install -y \
         qpdf \
@@ -61,23 +62,30 @@ RUN apt-get update && \
         'r-pkgdown' 'r-blogdown' && \
     conda clean --all -f -y && \
     ## install.packages r pkgs
-    R --quiet -e "install.packages(c('RClickhouse', 'cronR', 'blastula', 'rjson', 'xgboost', 'tsibble', 'fable'), repos='${CRAN_URL}')"  && \ 
+    R --quiet -e "install.packages(c('RClickhouse', 'blastula', 'rjson', 'xgboost', 'tsibble', 'fable'), repos='${CRAN_URL}'); devtools::install_github('bnosac/cronR')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
+# shiny https://xiangyun.rbind.io/2021/08/shiny-in-production/
 RUN R --quiet -e "install.packages(c( \
-        'shinythemes', 'shinydashboard', 'shinydashboardPlus', 'bs4Dash', 'shinyWidgets', 'shinycssloaders', 'shinyBS', 'shiny.i18n', \
-        'leaflet', 'leaflet.minicharts', \
-        'plotly', 'echarts4r', 'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
+        'flexdashboard', 'bs4Dash', 'shinydashboard', 'shinydashboardPlus', \
+        'shinyFeedback', 'shinyWidgets', \
+        'bslib', 'sass', 'thematic', 'htmltools', 'jquerylib', 'htmlwidgets', \
+        'plotly', 'echarts4r', 'leaflet', 'leaflet.minicharts', 'visNetwork', \
+        'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
+         'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
-# modify jupyter_shiny_proxy
+# setting jupyter_shiny_proxy home directory to /srv/shiny-server
 RUN cd /opt/conda/lib/python3.9/site-packages/jupyter_shiny_proxy &&  \
     awk '{sub(/os.getcwd\(\)/,"\"/srv/shiny-server\"")}1' __init__.py > /tmp/temp.py && mv /tmp/temp.py __init__.py && \ 
     cd /
+# setting for service cron start
+RUN chmod gu+rw /var/run/ && \
+    chmod gu+s  /usr/sbin/cron
 
 # startup ------------------
 # R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
@@ -90,13 +98,13 @@ RUN echo 'session-default-working-dir=/home/jovyan/work' >> /etc/rstudio/rsessio
     echo 'session-default-new-project-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf
 COPY ./config/rstudio-prefs.json /etc/rstudio/rstudio-prefs.json
 
-
 RUN mkdir -p /home/jovyan/share && \
     ln -s /home/jovyan/share /home/jovyan/work/share && \
     fix-permissions "/home/${NB_USER}"
-    
+
 WORKDIR $HOME
 USER $NB_UID
+
 
 # docker build -t shichenxie/dstudio_lab:ds1.4.2 -f Dockerfile_labds_jupyter1.4 .
 
