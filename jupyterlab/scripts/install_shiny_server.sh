@@ -3,7 +3,13 @@ set -e
 
 SHINY_SERVER_VERSION=${1:-${SHINY_SERVER_VERSION:-latest}}
 
+## build ARGs
+NCPUS=${NCPUS:--1}
+
 # Run dependency scripts
+. /rocker_scripts/install_s6init.sh
+. /rocker_scripts/install_pandoc.sh
+
 if [ "$SHINY_SERVER_VERSION" = "latest" ]; then
   SHINY_SERVER_VERSION=$(wget -qO- https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION)
 fi
@@ -13,7 +19,7 @@ apt-get update
 apt-get install -y --no-install-recommends \
     sudo \
     gdebi-core \
-    libcurl4-gnutls-dev \
+    libcurl4-openssl-dev \
     libcairo2-dev \
     libxt-dev \
     xtail \
@@ -25,7 +31,7 @@ gdebi -n ss-latest.deb
 rm ss-latest.deb
 
 # Get R packages
-# install2.r --error --skipinstalled shiny rmarkdown
+# install2.r --error --skipinstalled -n $NCPUS shiny rmarkdown
 
 # Set up directories and permissions
 if [ -x "$(command -v rstudio-server)" ]; then
@@ -53,3 +59,4 @@ chmod +x /etc/services.d/shiny-server/run
 
 # Clean up
 rm -rf /var/lib/apt/lists/*
+rm -rf /tmp/downloaded_packages

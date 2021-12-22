@@ -4,6 +4,9 @@ set -e
 # always set this for scripts but don't declare as ENV..
 export DEBIAN_FRONTEND=noninteractive
 
+## build ARGs
+NCPUS=${NCPUS:--1}
+
 apt-get update -qq \
   && apt-get install -y --no-install-recommends \
     gdal-bin \
@@ -36,14 +39,14 @@ apt-get update -qq \
 ## permissionless PAT for builds
 UBUNTU_VERSION=${UBUNTU_VERSION:-`lsb_release -sc`}
 if [ ${UBUNTU_VERSION} == "bionic" ]; then
-  R -e "Sys.setenv(GITHUB_PAT='8a103d7f9872a210a259dca273b9db05ca0ee84e'); remotes::install_github('r-spatial/lwgeom')"
+  R -e "remotes::install_version('lwgeom', '0.2-4')"
 fi
 
 
 ## Somehow foreign is messed up on CRAN between 2020-04-25 -- 2020-05-0?
-##install2.r --error --skipinstalled --repo https://mran.microsoft.com/snapshot/2020-04-24 foreign
+##install2.r --error --skipinstalled --repo https://mran.microsoft.com/snapshot/2020-04-24 -n $NCPUS foreign
 
-install2.r --error --skipinstalled \
+install2.r --error --skipinstalled -n $NCPUS \
     RColorBrewer \
     RandomFields \
     RNetCDF \
@@ -68,14 +71,18 @@ install2.r --error --skipinstalled \
     spatialreg \
     spdep \
     stars \
+    terra \
     tidync \
     tmap \
     geoR \
-    geosphere
+    geosphere \
+    BiocManager
 
 R -e "BiocManager::install('rhdf5')"
 
 ## install wgrib2 for NOAA's NOMADS / rNOMADS forecast files
 /rocker_scripts/install_wgrib2.sh
 
+# Clean up
+rm -rf /var/lib/apt/lists/*
 rm -r /tmp/downloaded_packages

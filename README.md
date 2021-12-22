@@ -29,7 +29,7 @@ docker-compose up -d
 
 ## 用户登陆与新建
 
-默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。登陆之后默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。该页面对应 url 为 `http://localhost:8000/user/dstudio/lab`，可以将其中最后的 lab 修改为 rstudio 进入 rstudio server 页面。
+默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。登陆之后默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。
 
 ![jupyter](./img/jupyter.png)
 ![rstudio](./img/rstudio.png)
@@ -41,6 +41,16 @@ docker-compose up -d
 ### 修改密码
 
 用原密码登陆之后，进入 `http://localhost:8000/hub/change-password` 页面可以更新密码。
+
+## 功能简介
+
+### R 与 python
+
+主页为 jupyterlab 页面，其对应 url 为 `http://localhost:8000/user/dstudio/lab`，最后的 lab 修改为 rstudio 进入 rstudio server 页面，可以分别使用 python 和 R 开展数据建模分析相关工作。而且 R 与 python 之间是相互打通了的，在 R 环境中可使用 [reticulate 包](https://rstudio.github.io/reticulate/)访问 python；而在 python 环境中可使用 [rpy2 包](https://rpy2.github.io/)访问 R。
+
+### shiny 服务
+
+将主页 url 最后的 lab 修改为 shiny，则能够进入 shiny 服务的页面。管理员主页上有shiny服务的按钮，不需要手动修改 url。该 shiny 服务部署在 `/srv/shiny-server` 文件夹，可以根据自己的需要将该文件夹更新，并固化到 docker 容器之后，所有用户就能够访问定制化的 shiny 服务了。
 
 ## 贡献与参考
 

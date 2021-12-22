@@ -1,4 +1,4 @@
-FROM jupyterhub/jupyterhub:1.4.2
+FROM jupyterhub/jupyterhub:1.5.0
 # https://hub.docker.com/layers/jupyterhub/jupyterhub
 
 # pkgs
@@ -29,5 +29,5 @@ WORKDIR /srv/jupyterhub
 COPY ./jupyterhub_config.py /opt/jupyterhub/jupyterhub_config.py
 CMD ["jupyterhub", "-f", "/opt/jupyterhub/jupyterhub_config.py"]
 
-# docker build -t shichenxie/dstudio_hub:1.4.2 -f Dockerfile1.4 .
+# docker build -t shichenxie/dstudio_hub:1.5.0 -f Dockerfile1.5 .
 # docker save shichenxie/dstudio_hub:1.2.2 -o ~/Downloads/dstudio_hub.tar
