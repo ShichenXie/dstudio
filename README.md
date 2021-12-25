@@ -4,13 +4,13 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/jupyter/datascience-notebook/) 基础上配置登陆管理与 rstudio server 与 shiny server 环境的 docker 容器。极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
+dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/jupyter/datascience-notebook/) 基础上配置登陆管理、rstudio server 与 shiny server 环境的 docker 容器。极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
 
 ![login](./img/login.png)
 
 ## 如何开始
 
-首先需要配置 docker 环境，其安装过程参见[docker 在线文档](https://docs.docker.com/get-started/)。
+首先需要配置 docker 环境，其安装过程参见 [docker 在线文档](https://docs.docker.com/get-started/)。
 
 ### 下载 docker image
 
@@ -31,8 +31,8 @@ docker pull shichenxie/dstudio_lab:ds1.5.0
 
 ### 启动服务
 
-该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目根目录中已经提供了，可以直接通过命令行下载，或者手动复制保存也很简单的。
-然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了。服务启动之后，可以通过浏览器访问 jupyterlab 和 rstudio server 了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
+该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目根目录中已经提供了，可以通过命令行下载，或者直接手动复制保存。
+然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，从而实现通过浏览器访问。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
 
 ```
 # 下载 docker-compose.yml 文件
@@ -47,12 +47,14 @@ docker-compose up -d
 
 ## 用户登陆与新建
 
+### 管理员用户
+
 默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。登陆之后默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。
 
 ![jupyter](./img/jupyter.png)
 ![rstudio](./img/rstudio.png)
 
-### 新建用户
+### 普通用户
 
 先在登陆页面 `http://localhost:8000/` 点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面进行审批，即完成了新用户的创建。
 
