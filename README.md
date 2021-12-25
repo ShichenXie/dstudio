@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/jupyter/datascience-notebook/) 基础上配置登陆管理、rstudio server 与 shiny server 环境的 docker 容器。极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
+dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/jupyter/datascience-notebook/) 基础上配置了登陆管理、rstudio server 与 shiny server 环境的 docker 容器。极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
 
 ![login](./img/login.png)
 
@@ -51,8 +51,8 @@ docker-compose up -d
 
 默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。登陆之后默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。
 
-![jupyter](./img/jupyter.png)
-![rstudio](./img/rstudio.png)
+![Jupyterlab](./img/jupyterlab.png)
+![RstudioServer](./img/rstudioserver.png)
 
 ### 普通用户
 
@@ -63,6 +63,12 @@ docker-compose up -d
 用原密码登陆之后，进入 `http://localhost:8000/hub/change-password` 页面可以更新密码。
 
 ## 功能简介
+
+### 用户文件
+
+每个用户登陆之后默认进入 `～/work` 文件夹，该文件夹将默认固化至 `jupyterlab-user-xxx` volume（xxx 为用户名），从而持久化保存用户的个人文件。在服务器的 terminal 中可通过 `docker volume ls` 查看所有 volume。
+
+在 `～/work` 文件夹中还有一个 share 文件夹指向 `～/share`，所有用户均可以访问该文件夹，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume，从而实现多用户的文件共享。
 
 ### R 与 Python
 
@@ -75,6 +81,7 @@ docker-compose up -d
 ### cron 任务
 
 该容器还支持 cron 定时任务，在 rstudio server 页面的 terminal 窗口中，输入 cron service start 之后，即可通过 [cronR 包](https://github.com/bnosac/cronR)管理 cron 定时任务。
+
 
 ### 待完善功能
 
