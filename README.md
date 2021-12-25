@@ -32,7 +32,7 @@ docker pull shichenxie/dstudio_lab:ds1.5.0
 ### 启动服务
 
 该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目根目录中已经提供了，可以通过命令行下载，或者直接手动复制保存。
-然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，从而实现通过浏览器访问。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
+然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，最终实现浏览器访问了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
 
 ```
 # 下载 docker-compose.yml 文件
@@ -68,7 +68,7 @@ docker-compose up -d
 
 每个用户登陆之后默认进入 `～/work` 文件夹，该文件夹将默认固化至 `jupyterlab-user-xxx` volume（xxx 为用户名），从而持久化保存用户的个人文件。在服务器的 terminal 中可通过 `docker volume ls` 查看所有 volume。
 
-在 `～/work` 文件夹中还有一个 share 文件夹指向 `～/share`，所有用户均可以访问该文件夹，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume，从而实现多用户的文件共享。
+在 `～/work` 文件夹中还有一个 share 文件夹指向 `～/share`，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume。所有用户的 share 文件夹都固化至同一个 volume，从而实现多用户之间的文件共享。
 
 ### R 与 Python
 
@@ -80,7 +80,7 @@ docker-compose up -d
 
 ### cron 任务
 
-该容器还支持 cron 定时任务，在 rstudio server 页面的 terminal 窗口中，输入 cron service start 之后，即可通过 [cronR 包](https://github.com/bnosac/cronR)管理 cron 定时任务。
+该容器还支持 cron 定时任务，在 jupyterlab 或 rstudio server 页面的 terminal 窗口中，输入 cron service start 之后，即可通过 [cronR 包](https://github.com/bnosac/cronR)管理 cron 定时任务。
 
 
 ### 待完善功能
