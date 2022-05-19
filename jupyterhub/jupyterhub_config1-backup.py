@@ -2,20 +2,17 @@
 import os
 import sys
 import nativeauthenticator
+ 
+from jupyterhub.auth import LocalAuthenticator
+from nativeauthenticator import NativeAuthenticator
+class LocalNativeAuthenticator(NativeAuthenticator, LocalAuthenticator):
+  pass
 
 # jupyterhub_config.py
 c = get_config()
 
-c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
-c.JupyterHub.authenticator_class = 'nativeauthenticator.NativeAuthenticator'
-# from jupyter_client.localinterfaces import public_ips
-# c.JupyterHub.hub_ip = public_ips()[0]
-# User containers will access hub by container name on the Docker network
-c.JupyterHub.hub_ip = os.environ['HUB_IP'] # 'jupyterhub'
-# c.JupyterHub.hub_port = 8888
-
-
 ## Docker spawner
+c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
 c.DockerSpawner.image = os.environ['DOCKER_JUPYTERLAB_IMAGE']
 # Connect containers to this Docker network
 network_name = os.environ['DOCKER_NETWORK_NAME']
@@ -47,8 +44,24 @@ else:
 c.DockerSpawner.volumes = volumes_dict
 
 
+## Generic
+# c.JupyterHub.ip = '0.0.0.0'
+# c.JupyterHub.port = 8888
+
+# from jupyter_client.localinterfaces import public_ips
+# c.JupyterHub.hub_ip = public_ips()[0]
+# c.JupyterHub.hub_ip = os.environ['HUB_IP']
+# User containers will access hub by container name on the Docker network
+c.JupyterHub.hub_ip = os.environ['HUB_IP'] # 'jupyterhub'
+c.JupyterHub.hub_port = 8888
+
+
 # authenticator
+c.JupyterHub.authenticator_class = LocalNativeAuthenticator
+c.LocalAuthenticator.create_system_users = True
+c.LocalAuthenticator.group_whitelist = {'ds'}
 c.Authenticator.admin_users = {os.environ['HUB_ADMIN_USER']}
+# c.Authenticator.whitelist = {'ds'}
 c.Authenticator.check_common_password = True
 c.Authenticator.minimum_password_length = 6
 c.Authenticator.allowed_failed_logins = 3

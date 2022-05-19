@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/jupyter/datascience-notebook/) 基础上配置了登陆管理、rstudio server 与 shiny server 环境的 docker 容器。极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
+dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/jupyter/datascience-notebook/)的基础上配置了登陆管理、rstudio server 与 shiny server 环境的 docker 容器。极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。需要说明的是 [rstudio server Pro](https://rstudio.com/products/rstudio-server-pro/) 提供了更为全面的功能与服务。本项目主要是提供了一个开箱即用的免费开源选项。
 
 ![login](./img/login.png)
 
@@ -31,8 +31,7 @@ docker pull shichenxie/dstudio_lab:ds1.5.0
 
 ### 启动服务
 
-该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目根目录中已经提供了，可以通过命令行下载，或者直接手动复制保存。
-然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，最终实现浏览器访问了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
+该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目的根目录中已经提供了，可以通过命令行下载，或者直接手动复制保存。然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，最终实现浏览器访问了。如果部署在本地电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
 
 ```
 # 下载 docker-compose.yml 文件
@@ -56,7 +55,7 @@ docker-compose up -d
 
 ### 普通用户
 
-先在登陆页面 `http://localhost:8000/` 点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员登陆，并跳转至 `http://localhost:8000/hub/authorize` 页面进行审批，即完成了新用户的创建。
+先在登陆页面 `http://localhost:8000/` 点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员审批，审批页面链接为 `http://localhost:8000/hub/authorize`。审批之后就完成了新用户的创建。
 
 ### 修改密码
 
@@ -72,7 +71,7 @@ docker-compose up -d
 
 ### R 与 Python
 
-主页为 jupyterlab 页面，其对应 url 为 `http://localhost:8000/user/dstudio/lab`，最后的 lab 修改为 rstudio 进入 rstudio server 页面，可以分别使用 Python 和 R 开展数据建模分析相关工作。而且 R 与 Python 之间是相互打通了的，在 R 环境中可使用 [reticulate 包](https://rstudio.github.io/reticulate/)访问 Python；而在 Python 环境中可使用 [rpy2 包](https://rpy2.github.io/)访问 R。如果团队内有使用 Julia 也可以直接通过 jupyterlab 使用。
+主页为 jupyterlab 页面，其对应 url 为 `http://localhost:8000/user/dstudio/lab`，最后的 lab 修改为 rstudio 进入 rstudio server 页面，可以分别使用 Python 和 R 开展数据建模分析相关工作。而且 R 与 Python 之间是相互打通了的，在 R 环境中可使用 [reticulate 包](https://rstudio.github.io/reticulate/)访问 Python；而在 Python 环境中可使用 [rpy2 包](https://rpy2.github.io/)访问 R。如果团队内有使用 Julia 也可以直接通过 jupyterlab 开展相关工作。
 
 ### shiny 服务
 

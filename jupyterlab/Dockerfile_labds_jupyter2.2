@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook:hub-1.5.0
+FROM jupyter/datascience-notebook:hub-2.2.1
 # https://hub.docker.com/r/jupyter/datascience-notebook/
 
 WORKDIR /
@@ -20,7 +20,7 @@ ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
 ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN
 
 ENV S6_VERSION=v2.1.0.2
-ENV RSTUDIO_VERSION=2021.09.1+372
+ENV RSTUDIO_VERSION=2022.02.0+443
 ENV PANDOC_VERSION=default
 # ENV DEFAULT_USER=${NB_USER}
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
@@ -52,44 +52,37 @@ RUN conda install --quiet --yes pip && \
     fix-permissions "/home/${NB_USER}"
 
 # r pkgs 
+# r-dbi https://github.com/r-dbi # service cron start
 RUN apt-get update && \
-    apt-get install -y qpdf cron default-jdk && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* 
-
-## r-dbi https://github.com/r-dbi # service cron start
-RUN conda install --quiet --yes \
-        'r-png' 'r-reticulate' 'r-pkgdown' \ 
-        'r-odbc' 'r-rjdbc' 'r-rpostgres' && \
+    apt-get install -y \
+        qpdf \
+        cron \
+        default-jdk && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    # conda install r pkgs
+    conda install --quiet --yes \
+        'r-png' 'r-reticulate' \
+        'r-odbc' 'r-rjdbc' 'r-rpostgres' \
+        'r-mlr3' 'r-scorecard' \
+        'r-pkgdown' 'r-blogdown' && \
     conda clean --all -f -y && \
     ## install.packages r pkgs
-    R --quiet -e "install.packages(c('RClickhouse', 'blastula', 'rjson'), repos='${CRAN_URL}'); \
-        devtools::install_github('bnosac/cronR')"  && \ 
-    R --quiet -e "install.packages(c('pkgdown', 'blogdown', 'showtext'), repos='${CRAN_URL}')"  && \ 
+    R --quiet -e "install.packages(c('showtext', 'RClickhouse', 'blastula', 'rjson', 'xgboost', 'tsibble', 'fable', 'pedquant', 'tidytext', 'jiebaR', 'stringdist'), repos='${CRAN_URL}'); devtools::install_github('bnosac/cronR')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 
-## ml 
-RUN R --quiet -e "install.packages(c( \
-        'xgboost', 'mlr3', 'scorecard', 'xefun', \
-        'tidytext', 'stringdist', 'jiebaR', \
-        'tsibble', 'fable', 'pedquant'), repos='${CRAN_URL}')"  && \ 
-    R --quiet -e "install.packages(c('h2o'), repos='${CRAN_URL}')"  && \ 
-    rm -rf /tmp/* && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
-
-## shiny 
+# shiny https://xiangyun.rbind.io/2021/08/shiny-in-production/
 RUN R --quiet -e "install.packages(c( \
         'flexdashboard', 'bs4Dash', 'shinydashboard', 'shinydashboardPlus', \
         'shinyFeedback', 'shinyWidgets', \
         'bslib', 'sass', 'thematic', 'htmltools', 'jquerylib', 'htmlwidgets', \
-        'plotly', 'leaflet', 'leaflet.minicharts', 'visNetwork', 'qgraph', \
+        'plotly', 'echarts4r', 'leaflet', 'leaflet.minicharts', 'visNetwork', \
         'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
          'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}" 
+    fix-permissions "/home/${NB_USER}"
 
 # setting jupyter_shiny_proxy home directory to /srv/shiny-server
 RUN cd /opt/conda/lib/python3.9/site-packages/jupyter_shiny_proxy &&  \
@@ -118,7 +111,7 @@ WORKDIR $HOME
 USER $NB_UID
 
 
-# docker build -t shichenxie/dstudio_lab:ds1.5.0 -f ./Dockerfile_labds_jupyter1.5 .
+# docker build -t shichenxie/dstudio_lab:ds2.2 -f ./Dockerfile_labds_jupyter2.2 .
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
 # RUN conda remove --force -y openssl

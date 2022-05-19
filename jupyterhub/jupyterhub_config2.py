@@ -2,20 +2,29 @@
 import os
 import sys
 import nativeauthenticator
+pjoin = os.path.join
 
 # jupyterhub_config.py
 c = get_config()
 
 c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
 c.JupyterHub.authenticator_class = 'nativeauthenticator.NativeAuthenticator'
+
 # from jupyter_client.localinterfaces import public_ips
 # c.JupyterHub.hub_ip = public_ips()[0]
-# User containers will access hub by container name on the Docker network
-c.JupyterHub.hub_ip = os.environ['HUB_IP'] # 'jupyterhub'
+c.JupyterHub.hub_ip = '0.0.0.0' # os.environ['HUB_IP'] # 'jupyterhub'
 # c.JupyterHub.hub_port = 8888
+c.JupyterHub.hub_connect_ip = os.environ['HUB_IP']
+c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
+
+runtime_dir = os.path.join('/srv/jupyterhub')
+# in /var/run/jupyterhub
+c.JupyterHub.cookie_secret_file = pjoin(runtime_dir, 'cookie_secret')
+c.JupyterHub.db_url = pjoin(runtime_dir, 'jupyterhub.sqlite')
+# or `--db=/path/to/jupyterhub.sqlite` on the command-line
 
 
-## Docker spawner
+## Docker Spawner
 c.DockerSpawner.image = os.environ['DOCKER_JUPYTERLAB_IMAGE']
 # Connect containers to this Docker network
 network_name = os.environ['DOCKER_NETWORK_NAME']
@@ -63,8 +72,20 @@ c.Authenticator.allowed_failed_logins = 3
 # Services
 c.JupyterHub.services = [
     {
-        'name': 'idle-culler',
-        'admin': True,
-        'command': [sys.executable, '-m', 'jupyterhub_idle_culler', '--timeout=90000'],
+        "name": "idle-culler",
+        "command": [
+            sys.executable, "-m",
+            "jupyterhub_idle_culler",
+            "--timeout=3600"
+        ],
+    }
+]
+
+c.JupyterHub.load_roles = [
+    {
+        "name": "idle-culler",
+        "description": "Culls idle servers",
+        "scopes": ["read:users:name", "read:users:activity", "servers"],
+        "services": ["idle-culler"],
     }
 ]

@@ -1,10 +1,10 @@
-FROM jupyterhub/jupyterhub:1.5.0
+FROM jupyterhub/jupyterhub:2.2.1
 # https://hub.docker.com/layers/jupyterhub/jupyterhub
 
 # pkgs
 RUN python3 -m pip install --upgrade --no-cache pip && \
     python3 -m pip install --no-cache \
-	   jupyter_client \
+       jupyter_client \
        dockerspawner \
        jupyterhub-idle-culler &&\
     rm -rf /tmp/*
@@ -20,11 +20,12 @@ RUN apt-get update &&\
 # config -----------------------------------------------------------------#
 USER root
 RUN mkdir -p /srv/jupyterhub/ &&\
-    mkdir -p /etc/jupyterhub/
+    mkdir -p /etc/jupyterhub/ &&\ 
+    mkdir -p /var/log/ 
 WORKDIR /srv/jupyterhub
 
 COPY ./jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 CMD ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"]
 
-# docker build -t shichenxie/dstudio_hub:1.5.0 -f ./Dockerfile1.5 .
+# docker build -t shichenxie/dstudio_hub:2.2 -f ./Dockerfile2.2 .
 # docker save shichenxie/dstudio_hub:1.2.2 -o ~/Downloads/dstudio_hub.tar
