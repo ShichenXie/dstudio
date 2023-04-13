@@ -20,9 +20,9 @@ ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
 ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN
 
 ENV S6_VERSION=v2.1.0.2
-ENV RSTUDIO_VERSION=2021.09.1+372
+ENV RSTUDIO_VERSION=2023.03.0+386
 ENV PANDOC_VERSION=default
-# ENV DEFAULT_USER=${NB_USER}
+ENV DEFAULT_USER=${NB_USER}
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
 
 RUN /rocker_scripts/install_rstudio.sh && \
@@ -37,12 +37,13 @@ RUN /rocker_scripts/install_rstudio.sh && \
 
 # pkgs ------------------
 # py pgks
+# python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
 ENV RSESSION_PROXY_RSTUDIO_1_4=yes
-RUN conda install --quiet --yes pip && \
-    python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
+RUN conda install --quiet --yes pip && \    
     python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache \
         xgboost \
         sklearn2pmml \
+        jupyter-rsession-proxy \
         jupyter-shiny-proxy && \ 
     rm -rf /tmp/* && \
     ## conda install
@@ -59,14 +60,17 @@ RUN apt-get update && \
 ## r-dbi https://github.com/r-dbi # service cron start
 RUN conda install --quiet --yes \
         'r-png' 'r-reticulate' 'r-pkgdown' \ 
-        'r-odbc' 'r-rjdbc' 'r-rpostgres' && \
+        'r-odbc' 'r-rjdbc' 'r-rpostgres' 'r-RMySQL' && \
     conda clean --all -f -y && \
+    fix-permissions "${R_HOME}" && \
+    fix-permissions "/home/${NB_USER}"
+
     ## install.packages r pkgs
-    R --quiet -e "install.packages(c('RClickhouse', 'blastula', 'rjson'), repos='${CRAN_URL}'); \
+RUN R --quiet -e "install.packages(c('RClickhouse', 'blastula', 'rjson'), repos='${CRAN_URL}'); \
         devtools::install_github('bnosac/cronR')"  && \ 
     R --quiet -e "install.packages(c('pkgdown', 'blogdown', 'showtext'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
-    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "${R_HOME}" && \
     fix-permissions "/home/${NB_USER}"
 
 ## ml 
@@ -76,7 +80,7 @@ RUN R --quiet -e "install.packages(c( \
         'tsibble', 'fable', 'pedquant'), repos='${CRAN_URL}')"  && \ 
     R --quiet -e "install.packages(c('h2o'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
-    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "${R_HOME}" && \
     fix-permissions "/home/${NB_USER}"
 
 ## shiny 
@@ -88,8 +92,9 @@ RUN R --quiet -e "install.packages(c( \
         'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
          'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
     rm -rf /tmp/* && \
-    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "${R_HOME}" && \
     fix-permissions "/home/${NB_USER}" 
+
 
 # setting jupyter_shiny_proxy home directory to /srv/shiny-server
 RUN cd /opt/conda/lib/python3.9/site-packages/jupyter_shiny_proxy &&  \
@@ -101,7 +106,7 @@ RUN chmod gu+rw /var/run/ && \
 
 # startup ------------------
 # R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
-RUN echo 'options(repos = c(CRAN = "https://cran.rstudio.com/", CRANextra = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
+RUN echo 'options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/", CRANextra = "https://cran.rstudio.com/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
     echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site
 # R_HOME, R_LIBS, LD_LIBRARY_PATH, PATH
 
@@ -114,11 +119,14 @@ RUN mkdir -p /home/jovyan/share && \
     ln -s /home/jovyan/share /home/jovyan/work/share && \
     fix-permissions "/home/${NB_USER}"
 
+# set localtime
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
 WORKDIR $HOME
 USER $NB_UID
 
 
-# docker build -t shichenxie/dstudio_lab:ds1.5.0 -f ./Dockerfile_labds_jupyter1.5 .
+# docker build --platform linux/amd64 -t shichenxie/dstudio_lab:1.5 -f ./Dockerfile_labds_jupyter1.5 .
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
 # RUN conda remove --force -y openssl

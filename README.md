@@ -18,12 +18,12 @@ dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/ju
 
 ```
 # 直接下载 dstudio_hub 和 dstudio_lab image
-docker pull shichenxie/dstudio_hub:1.5.0
-docker pull shichenxie/dstudio_lab:ds1.5.0
+docker pull shichenxie/dstudio_hub:1.5
+docker pull shichenxie/dstudio_lab:1.5
 
 # 保存为离线文件
-# docker save shichenxie/dstudio_hub:1.5.0 -o ~/Downloads/dstudio_hub.tar
-# docker save shichenxie/dstudio_lab:ds1.5.0 -o ~/Downloads/dstudio_lab.tar
+# docker save shichenxie/dstudio_hub:1.5 -o ~/Downloads/dstudio_hub.tar
+# docker save shichenxie/dstudio_lab:1.5 -o ~/Downloads/dstudio_lab.tar
 # 加载本地的 image
 # docker load --input dstudio_hub.tar
 # docker load --input dstudio_lab.tar

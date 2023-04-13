@@ -3,7 +3,7 @@ version: '3.5'
 services:
   jupyterhub:
     # build: jupyterhub
-    image: shichenxie/dstudio_hub:2.2
+    image: shichenxie/dstudio_hub:1.5
     container_name: jupyterhub
     # Permit communication with the host's docker server
     volumes:
@@ -15,7 +15,7 @@ services:
       - "8000:8000"
     environment:
       DOCKER_NETWORK_NAME: dstudio_net
-      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:ds2.2
+      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:1.5
       CONTAINER_JUPYTERLAB_REMOVE: T
       HOST_WORK_DIR: 
       HUB_DEFAULT_URL: /lab

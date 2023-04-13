@@ -68,3 +68,6 @@ c.JupyterHub.services = [
         'command': [sys.executable, '-m', 'jupyterhub_idle_culler', '--timeout=90000'],
     }
 ]
+
+
+c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]

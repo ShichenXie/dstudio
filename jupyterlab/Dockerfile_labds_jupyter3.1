@@ -1,0 +1,28 @@
+FROM jupyter/datascience-notebook:hub-3.1.1
+# docker pull jupyter/datascience-notebook:hub-3.1.1 --platform linux/amd64
+# https://hub.docker.com/r/jupyter/datascience-notebook/
+
+WORKDIR /
+USER root
+# set local source.list
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
+
+ENV R_HOME=/opt/conda/lib/R
+ENV R_LIB=/opt/conda/lib/R/library
+ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
+ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN
+
+
+RUN mkdir -p /home/jovyan/share && \
+    ln -s /home/jovyan/share /home/jovyan/work/share && \
+    fix-permissions "/home/${NB_USER}"
+
+WORKDIR $HOME
+USER $NB_UID
+
+
+# docker build --platform linux/amd64 -t shichenxie/dstudio_lab:3.1 -f ./Dockerfile_labds_jupyter3.1 .
+
+# fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
+# RUN conda remove --force -y openssl

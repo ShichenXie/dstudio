@@ -1,5 +1,7 @@
-FROM jupyterhub/jupyterhub:2.2.1
-# https://hub.docker.com/layers/jupyterhub/jupyterhub
+FROM jupyterhub/jupyterhub:3.1.1
+# docker pull jupyterhub/jupyterhub:3.1.1 --platform linux/amd64
+# https://hub.docker.com/r/jupyterhub/jupyterhub
+
 
 # pkgs
 RUN python3 -m pip install --upgrade --no-cache pip && \
@@ -8,14 +10,16 @@ RUN python3 -m pip install --upgrade --no-cache pip && \
        dockerspawner \
        jupyterhub-idle-culler &&\
     rm -rf /tmp/*
-# jupyterhub-nativeauthenticator
+
 
 # nativeauthenticator
+# https://github.com/jupyterhub/nativeauthenticator
 COPY nativeauthenticator /tmp/nativeauthenticator
-RUN apt-get update &&\
-    apt-get install -y git &&\
+# RUN apt-get update &&\
+#    apt-get install -y git &&\
 #    git clone https://github.com/jupyterhub/nativeauthenticator.git /tmp &&\
-    pip install -e /tmp/nativeauthenticator/. 
+RUN pip install -e /tmp/nativeauthenticator/. 
+
 
 # config -----------------------------------------------------------------#
 USER root
@@ -27,5 +31,5 @@ WORKDIR /srv/jupyterhub
 COPY ./jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 CMD ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"]
 
-# docker build -t shichenxie/dstudio_hub:2.2 -f ./Dockerfile2.2 .
+# docker build --platform linux/amd64 -t shichenxie/dstudio_hub:3.1 -f ./Dockerfile3.1 .
 # docker save shichenxie/dstudio_hub:1.2.2 -o ~/Downloads/dstudio_hub.tar

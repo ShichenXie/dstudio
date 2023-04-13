@@ -7,8 +7,17 @@ export DEBIAN_FRONTEND=noninteractive
 ## build ARGs
 NCPUS=${NCPUS:--1}
 
-apt-get update -qq \
-  && apt-get install -y --no-install-recommends \
+# a function to install apt packages only if they are not installed
+function apt_install() {
+    if ! dpkg -s "$@" >/dev/null 2>&1; then
+        if [ "$(find /var/lib/apt/lists/* | wc -l)" = "0" ]; then
+            apt-get update
+        fi
+        apt-get install -y --no-install-recommends "$@"
+    fi
+}
+
+apt_install \
     gdal-bin \
     lbzip2 \
     libfftw3-dev \
@@ -27,7 +36,6 @@ apt-get update -qq \
     libsqlite3-dev \
     libssl-dev \
     libudunits2-dev \
-    lsb-release \
     netcdf-bin \
     postgis \
     protobuf-compiler \
@@ -35,18 +43,7 @@ apt-get update -qq \
     tk-dev \
     unixodbc-dev
 
-# lwgeom 0.2-2 and 0.2-3 have a regression which prevents install on ubuntu:bionic
-## permissionless PAT for builds
-UBUNTU_VERSION=${UBUNTU_VERSION:-`lsb_release -sc`}
-if [ ${UBUNTU_VERSION} == "bionic" ]; then
-  R -e "remotes::install_version('lwgeom', '0.2-4')"
-fi
-
-
-## Somehow foreign is messed up on CRAN between 2020-04-25 -- 2020-05-0?
-##install2.r --error --skipinstalled --repo https://mran.microsoft.com/snapshot/2020-04-24 -n $NCPUS foreign
-
-install2.r --error --skipinstalled -n $NCPUS \
+install2.r --error --skipmissing --skipinstalled -n "$NCPUS" \
     RColorBrewer \
     RandomFields \
     RNetCDF \
@@ -81,8 +78,17 @@ install2.r --error --skipinstalled -n $NCPUS \
 R -e "BiocManager::install('rhdf5')"
 
 ## install wgrib2 for NOAA's NOMADS / rNOMADS forecast files
-/rocker_scripts/install_wgrib2.sh
+## This is no longer needed, but we include it for reproducibility
+## reasons on earlier base images.
+source /etc/os-release
+if [ "${UBUNTU_CODENAME}" == "focal" ]; then
+    /rocker_scripts/install_wgrib2.sh
+fi
 
 # Clean up
 rm -rf /var/lib/apt/lists/*
 rm -r /tmp/downloaded_packages
+
+## Strip binary installed lybraries from RSPM
+## https://github.com/rocker-org/rocker-versioned2/issues/340
+strip /usr/local/lib/R/site-library/*/libs/*.so

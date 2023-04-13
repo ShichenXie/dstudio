@@ -3,10 +3,17 @@ set -e
 
 ## https://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/
 
-if [ ! -x "$(command -v wget)" ]; then
-  apt-get update
-  apt-get -y install wget
-fi
+# a function to install apt packages only if they are not installed
+function apt_install() {
+    if ! dpkg -s "$@" >/dev/null 2>&1; then
+        if [ "$(find /var/lib/apt/lists/* | wc -l)" = "0" ]; then
+            apt-get update
+        fi
+        apt-get install -y --no-install-recommends "$@"
+    fi
+}
+
+apt_install wget ca-certificates
 
 cd /opt
 wget https://www.ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib2.tgz
@@ -25,7 +32,12 @@ cd grib2
 
 ## really someone needs to learn proper packaging conventions, but whatever
 CC=gcc FC=gfortran make
-ln -s /opt/grib2/wgrib2/wgrib2 /usr/local/bin/wgrib2
+mv /opt/grib2/wgrib2/wgrib2 /usr/local/bin/wgrib2
 
 # Clean up
 rm -rf /var/lib/apt/lists/*
+rm -rf /opt/grib2
+
+## Strip binary installed lybraries from RSPM
+## https://github.com/rocker-org/rocker-versioned2/issues/340
+strip /usr/local/lib/R/site-library/*/libs/*.so
