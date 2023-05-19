@@ -13,6 +13,12 @@ ENV R_LIB=/opt/conda/lib/R/library
 ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
 ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN
 
+WORKDIR /tmp
+RUN apt-get update && \
+    apt-get install -y psmisc lsb-release libssl-dev libclang-dev libpq5
+
+RUN wget https://download2.rstudio.org/server/jammy/amd64/rstudio-server-2023.03.0-386-amd64.deb  -O rstudio-server.deb && \
+    dpkg -i rstudio-server.deb
 
 RUN mkdir -p /home/jovyan/share && \
     ln -s /home/jovyan/share /home/jovyan/work/share && \
@@ -22,7 +28,7 @@ WORKDIR $HOME
 USER $NB_UID
 
 
-# docker build --platform linux/amd64 -t shichenxie/dstudio_lab:3.1 -f ./Dockerfile_labds_jupyter3.1 .
+# docker build --platform linux/amd64 -t shichenxie/dstudio_lab:3.1b -f ./Dockerfile_labds_jupyter3.1 .
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
 # RUN conda remove --force -y openssl
