@@ -8,7 +8,7 @@
 set -e
 
 RSTUDIO_VERSION=${1:-${RSTUDIO_VERSION:-"stable"}}
-# DEFAULT_USER=${DEFAULT_USER:-"rstudio"}
+DEFAULT_USER=${DEFAULT_USER:-"rstudio"}
 
 # a function to install apt packages only if they are not installed
 function apt_install() {
@@ -116,7 +116,7 @@ logger-type=syslog
 EOF
 
 # set up default user
-/rocker_scripts/default_user.sh "${DEFAULT_USER}"
+# /rocker_scripts/default_user.sh "${DEFAULT_USER}"
 
 # install user config initiation script
 cp /rocker_scripts/init_set_env.sh /etc/cont-init.d/01_set_env

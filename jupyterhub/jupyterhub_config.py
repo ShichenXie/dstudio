@@ -61,13 +61,13 @@ c.Authenticator.allowed_failed_logins = 3
 # c.Spawner.http_timeout = 600
 # c.Spawner.start_timeout = 600
 # Services
+hub_timeout = '--timeout='+os.environ['HUB_TIMEOUT']
 c.JupyterHub.services = [
     {
-        'name': 'idle-culler',
+        'name': 'idle-culler1',
         'admin': True,
-        'command': [sys.executable, '-m', 'jupyterhub_idle_culler', '--timeout=90000'],
+        'command': [sys.executable, '-m', 'jupyterhub_idle_culler', hub_timeout],
     }
 ]
-
 
 c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]

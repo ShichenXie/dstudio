@@ -8,7 +8,7 @@
 set -e
 
 RSTUDIO_VERSION=${1:-${RSTUDIO_VERSION:-"stable"}}
-# DEFAULT_USER=${DEFAULT_USER:-"rstudio"}
+DEFAULT_USER=${DEFAULT_USER:-"rstudio"}
 
 # shellcheck source=/dev/null
 source /etc/os-release

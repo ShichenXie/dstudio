@@ -27,8 +27,8 @@ apt_install \
     wget
 
 # Run dependency scripts
-# /rocker_scripts/install_s6init.sh
-# /rocker_scripts/install_pandoc.sh
+/rocker_scripts/install_s6init.sh
+/rocker_scripts/install_pandoc.sh
 
 # Install Shiny server
 
@@ -41,7 +41,7 @@ gdebi -n ss-latest.deb
 rm ss-latest.deb
 
 # Get R packages
-# install2.r --error --skipinstalled -n "$NCPUS" shiny rmarkdown
+install2.r --error --skipinstalled -n "$NCPUS" shiny rmarkdown
 
 # Set up directories and permissions
 if [ -x "$(command -v rstudio-server)" ]; then
@@ -49,7 +49,7 @@ if [ -x "$(command -v rstudio-server)" ]; then
     adduser "${DEFAULT_USER}" shiny
 fi
 
-# cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/
+cp -R /usr/local/lib/R/site-library/shiny/examples/* /srv/shiny-server/
 chown shiny:shiny /var/lib/shiny-server
 mkdir -p /var/log/shiny-server
 chown shiny:shiny /var/log/shiny-server
@@ -76,4 +76,4 @@ rm -rf /tmp/downloaded_packages
 
 ## Strip binary installed lybraries from RSPM
 ## https://github.com/rocker-org/rocker-versioned2/issues/340
-# strip /usr/local/lib/R/site-library/*/libs/*.so
+strip /usr/local/lib/R/site-library/*/libs/*.so

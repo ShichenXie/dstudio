@@ -11,36 +11,36 @@
 repos:
   # Autoformat: Python code, syntax patterns are modernized
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.3.1
+    rev: v3.3.2
     hooks:
       - id: pyupgrade
         args:
           - --py36-plus
 
   # Autoformat: Python code
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.1.1
     hooks:
-      - id: black
+      - id: autoflake
+        # args ref: https://github.com/PyCQA/autoflake#advanced-usage
         args:
-          - --target-version=py36
-          - --target-version=py37
-          - --target-version=py38
-          - --target-version=py39
-          - --target-version=py310
-          - --target-version=py311
+          - --in-place
 
   # Autoformat: Python code
-  # FIXME: update to isort with a --profile=black
-  - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.9.0
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
     hooks:
-      - id: reorder-python-imports
-        args: [--py3-plus]
+      - id: isort
+
+  # Autoformat: Python code
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
 
   # Autoformat: markdown, yaml (but not helm templates)
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.4
+    rev: v3.0.0-alpha.9-for-vscode
     hooks:
       - id: prettier
 

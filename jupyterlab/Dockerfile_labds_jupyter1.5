@@ -5,7 +5,7 @@ WORKDIR /
 USER root
 # set local source.list
 RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
-COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
+COPY ./linux_source/sources_ubuntu20.list /etc/apt/sources.list
 
 # rstudio server / shiny ------------------ 
 # https://github.com/rocker-org/rocker-versioned2
