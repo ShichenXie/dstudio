@@ -23,6 +23,9 @@ ENV PANDOC_VERSION=default
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
 
 COPY scripts /rocker_scripts
+# RUN awk '/^DEFAULT_USER=/ { $0 = "#" $0 }; 1' /rocker_scripts/install_rstudio.sh > /rocker_scripts/install_rstudio.sh 
+# install_shiny_server: # install2.r  # cp -R $R_LIB/shiny/examples/* /srv/shiny-server/
+
 RUN /rocker_scripts/install_rstudio.sh && \
     apt-get update && \
     apt-get install -y qpdf cron default-jdk && \
@@ -35,16 +38,8 @@ RUN /rocker_scripts/install_rstudio.sh && \
 # pkgs ------------------
 # python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
 ## conda install
-ENV RSESSION_PROXY_RSTUDIO_1_4=yes
-RUN conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ && \
-    conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
-    conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ && \
-    conda config --set show_channel_urls yes && \
-    conda config --set ssl_verify no && \
-    # conda info && \
-    ## install
-    conda install --quiet --yes pip && \    
-    conda install --quiet --yes 'JayDeBeApi' 'openpyxl' \ 
+# conda install --quiet --yes pip && \    
+RUN conda install --quiet --yes JayDeBeApi openpyxl \ 
         'r-png' 'r-odbc' 'r-RJDBC' 'r-RPostgres' && \
     conda clean --all -f -y && \ 
     rm -rf /tmp/* && \
@@ -52,6 +47,7 @@ RUN conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cl
     fix-permissions "/home/${NB_USER}"
 
 ## pip install # -i https://pypi.tuna.tsinghua.edu.cn/simple 
+ENV RSESSION_PROXY_RSTUDIO_1_4=yes
 RUN python3 -m pip install --no-cache xgboost sklearn2pmml jupyter-rsession-proxy 
 
 ## CRAN install 
@@ -64,9 +60,10 @@ RUN R --quiet -e "install.packages(c('RClickhouse', \
         'xgboost', 'mlr3', 'scorecard', 'xefun', \
         'tsibble', 'fable', 'pedquant', 'webdriver'), repos='${CRAN_URL}'); \
         devtools::install_local('/tmp/echarts4r.maps-master.zip')"  && \ 
-    rm -rf /tmp/* && \
+    rm -rf /tmp/* && \ 
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
+
 RUN R --quiet -e "install.packages(c('h2o'), repos='${CRAN_URL}')" && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
@@ -76,6 +73,29 @@ RUN R --quiet -e "install.packages(c('h2o'), repos='${CRAN_URL}')" && \
 RUN chmod gu+rw /var/run/ && \
     chmod gu+s  /usr/sbin/cron
 
+# shiny ------------------
+RUN /rocker_scripts/install_shiny_server.sh && \
+    chown -R $NB_UID:$NB_UID /srv/shiny-server/ && \
+    chown -R $NB_UID:$NB_UID /var/lib/shiny-server && \
+    chown -R $NB_UID:$NB_UID /var/log/shiny-server && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+RUN python3 -m pip install --no-cache jupyter-shiny-proxy && \
+    R --quiet -e "install.packages(c( \
+        'flexdashboard', 'bs4Dash', 'shinydashboard', 'shinydashboardPlus', \
+        'shinyFeedback', 'shinyWidgets', \
+        'bslib', 'sass', 'thematic', 'htmltools', 'jquerylib', 'htmlwidgets', \
+        'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
+         'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${R_HOME}" && \
+    fix-permissions "/home/${NB_USER}" 
+
+# setting jupyter_shiny_proxy home directory to /srv/shiny-server
+RUN cd /opt/conda/lib/python3.11/site-packages/jupyter_shiny_proxy &&  \
+    awk '{sub(/os.getcwd\(\)/,"\"/srv/shiny-server\"")}1' __init__.py > /tmp/temp.py && mv /tmp/temp.py __init__.py && \ 
+    cd /
 
 # startup ------------------
 # R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
@@ -104,7 +124,7 @@ WORKDIR $HOME
 USER $NB_UID
 
 # docker build --platform linux/amd64 -t shichenxie/dstudio_lab:4.0 -f ./Dockerfile_labds_jupyter4.0 .
-# docker build --progress=plain --no-cache  --platform linux/amd64 -t shichenxie/dstudio_lab:4.0 -f ./Dockerfile_labds_jupyter3.1 .
+# docker build --progress=plain --no-cache  --platform linux/amd64 -t shichenxie/dstudio_lab:4.0 -f ./Dockerfile_labds_jupyter4.0 .
 
 
 # fix openssl issue # https://github.com/tschaffter/rstudio/issues/1

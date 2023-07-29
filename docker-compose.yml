@@ -20,7 +20,7 @@ services:
       HOST_WORK_DIR: 
       HUB_DEFAULT_URL: /lab
       HUB_ADMIN_USER: dstudio
-      HUB_TIMEOUT: 3600
+      HUB_TIMEOUT: 86400 # seconds
       # User containers will access hub by container name on the Docker network
       HUB_IP: jupyterhub
     restart: always
