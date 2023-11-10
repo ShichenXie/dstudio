@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   jupyterhub:
-    # build: jupyterhub
+    platform: linux/amd64
     image: shichenxie/dstudio_hub:4.0
     container_name: jupyterhub
     # Permit communication with the host's docker server

@@ -31,5 +31,5 @@ WORKDIR /srv/jupyterhub
 COPY ./jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 CMD ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"]
 
-# docker build --platform linux/amd64 -t shichenxie/dstudio_hub:4.0 -f ./Dockerfile3.1 .
+# docker build --platform linux/amd64 -t shichenxie/dstudio_hub:4.0 -f ./Dockerfile4.0 .
 # docker save shichenxie/dstudio_hub:1.2.2 -o ~/Downloads/dstudio_hub.tar

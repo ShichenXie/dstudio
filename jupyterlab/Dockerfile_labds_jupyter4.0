@@ -1,5 +1,6 @@
-FROM jupyter/datascience-notebook:hub-4.0.0
+FROM jupyter/datascience-notebook:hub-4.0.2
 # docker pull jupyter/datascience-notebook:hub-4.0.0 --platform linux/amd64
+# docker pull jupyter/r-notebook:hub-4.0.0 --platform linux/amd64
 
 # https://hub.docker.com/r/jupyter/datascience-notebook/
 # https://github.com/rocker-org/rocker-versioned2
@@ -17,7 +18,7 @@ ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
 ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN/
 
 ENV S6_VERSION=v2.1.0.2
-ENV RSTUDIO_VERSION=2023.06.0+421
+ENV RSTUDIO_VERSION=2023.09.1+494
 ENV DEFAULT_USER=${NB_USER}
 ENV PANDOC_VERSION=default
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
@@ -37,7 +38,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
 
 # pkgs ------------------
 # python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
-## conda install
+## conda install # 
 # conda install --quiet --yes pip && \    
 RUN conda install --quiet --yes JayDeBeApi openpyxl \ 
         'r-png' 'r-odbc' 'r-RJDBC' 'r-RPostgres' && \
@@ -83,8 +84,9 @@ RUN /rocker_scripts/install_shiny_server.sh && \
 
 RUN python3 -m pip install --no-cache jupyter-shiny-proxy && \
     R --quiet -e "install.packages(c( \
+        'golem', 'shinipsum', 'fakir', 'gemstones', 'attachment', \
         'flexdashboard', 'bs4Dash', 'shinydashboard', 'shinydashboardPlus', \
-        'shinyFeedback', 'shinyWidgets', \
+        'shinyFeedback', 'shinyWidgets', 'kableExtra', 'DT', \
         'bslib', 'sass', 'thematic', 'htmltools', 'jquerylib', 'htmlwidgets', \
         'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
          'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
