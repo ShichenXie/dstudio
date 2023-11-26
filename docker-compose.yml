@@ -1,41 +1,41 @@
 version: '3.5'
 
 services:
-  jupyterhub:
-    platform: linux/amd64
-    image: shichenxie/dstudio_hub:4.0
+  hub:
+    image: shichenxie/dstudio_hub:4.0 
     container_name: jupyterhub
+    restart: always
+    networks:
+      - jupyterhub-network
     # Permit communication with the host's docker server
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "jupyterhub_data:/srv/jupyterhub"
-    networks:
-      - dstudio_net
+      # Bind Docker socket on the host so we can connect to the daemon from within the container
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+      # Bind Docker volume on host for JupyterHub database and cookie secrets
+      - "jupyterhub-data:/data"
     ports:
       - "8000:8000"
     environment:
-      DOCKER_NETWORK_NAME: dstudio_net
-      DOCKER_JUPYTERLAB_IMAGE: shichenxie/dstudio_lab:4.0
-      CONTAINER_JUPYTERLAB_REMOVE: T
-      HOST_WORK_DIR: 
       HUB_DEFAULT_URL: /lab
-      HUB_ADMIN_USER: dstudio
-      HUB_TIMEOUT: 86400 # seconds
-      # User containers will access hub by container name on the Docker network
-      HUB_IP: jupyterhub
-    restart: always
-  # jupyterlab:
-  #   build: jupyterlab
-  #   image: shichenxie/dstudio_lab:ds
-  #   network_mode: none
-  #   command: echo
-  
-networks:
-  dstudio_net:
-     driver: bridge
-     name: dstudio_net
-     
+      HUB_TIMEOUT: 1296000 # seconds
+      # This username will be a JupyterHub admin
+      HUB_ADMIN: dstudio
+      # Allow anyone to sign-up without approval
+      HUB_OPEN_SIGNUP: False
+      # JupyterHub will spawn this Notebook image for users
+      DOCKER_NOTEBOOK_IMAGE: shichenxie/dstudio_lab:4.0
+      CONTAINER_NOTEBOOK_REMOVE: False
+      # Mount the directory on host to the notebook directory in the container
+      DOCKER_NOTEBOOK_DIR_HOST: 
+      # All containers will join this network
+      DOCKER_NETWORK_NAME: jupyterhub-network
+      
 volumes:
-  jupyterhub_data:
-    name: jupyterhub_data
+  jupyterhub-data:
+    name: jupyterhub-data
+
+networks:
+  jupyterhub-network:
+    name: jupyterhub-network
+
 

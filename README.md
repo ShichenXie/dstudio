@@ -97,8 +97,7 @@ docker-compose up -d
 本项目参考了以下内容或项目：
 - [Docker — 从入门到实践](https://yeasy.gitbook.io/docker_practice/)
 - [A Docker tutorial for reproducible research.](http://ropenscilabs.github.io/r-docker-tutorial/)
-- [Jupyter](https://jupyter.org/), [JupyterHub](https://jupyterhub.readthedocs.io/), [DockerSpawner](https://jupyterhub-dockerspawner.readthedocs.io/)
-- [JupyterHub Native Authenticator](https://native-authenticator.readthedocs.io/en/latest/)
+- [Jupyter](https://jupyter.org/), [JupyterHub](https://jupyterhub.readthedocs.io/)([jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker)), [DockerSpawner](https://jupyterhub-dockerspawner.readthedocs.io/), [JupyterHub Native Authenticator](https://native-authenticator.readthedocs.io/en/latest/)
 - [jupyter-rsession-proxy](https://github.com/jupyterhub/jupyter-rsession-proxy)
 - [RStudio Server Pro - Administration Guide](https://docs.rstudio.com/ide/server-pro/latest/)
 - [Version-stable Rocker images](https://github.com/rocker-org/rocker-versioned)

@@ -1,57 +1,75 @@
-# JupyterHub configuration
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+# Configuration file for JupyterHub
 import os
 import sys
 import nativeauthenticator
 
-# jupyterhub_config.py
-c = get_config()
+c = get_config()  # noqa: F821
 
-c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
-c.JupyterHub.authenticator_class = 'nativeauthenticator.NativeAuthenticator'
-# from jupyter_client.localinterfaces import public_ips
-# c.JupyterHub.hub_ip = public_ips()[0]
-# User containers will access hub by container name on the Docker network
-c.JupyterHub.hub_ip = os.environ['HUB_IP'] # 'jupyterhub'
-# c.JupyterHub.hub_port = 8888
+# We rely on environment variables to configure JupyterHub so that we
+# avoid having to rebuild the JupyterHub container every time we change a
+# configuration parameter.
 
+# Spawn single-user servers as Docker containers
+c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 
-## Docker spawner
-c.DockerSpawner.image = os.environ['DOCKER_JUPYTERLAB_IMAGE']
+# Spawn containers from this image
+c.DockerSpawner.image = os.environ["DOCKER_NOTEBOOK_IMAGE"]
+
 # Connect containers to this Docker network
-network_name = os.environ['DOCKER_NETWORK_NAME']
+network_name = os.environ["DOCKER_NETWORK_NAME"]
 c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.network_name = network_name
-c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
-# Remove container once they are stopped
-def str2bool(v):
-  return v.lower() in ("yes", "true", "t", "1")
-rmcont = str2bool(os.environ['CONTAINER_JUPYTERLAB_REMOVE']) if 'CONTAINER_JUPYTERLAB_REMOVE' in list(os.environ) else True
-c.DockerSpawner.remove = rmcont
-# For debugging arguments passed to spawned containers
-c.DockerSpawner.debug = True
-c.DockerSpawner.cmd = 'start-singleuser.sh'
-c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
 
-
+# Explicitly set notebook directory because we'll be mounting a volume to it.
+# Most `jupyter/docker-stacks` *-notebook images run the Notebook server as
+# user `jovyan`, and set the notebook directory to `/home/jovyan/work`.
 # user data persistence
 # see https://github.com/jupyterhub/dockerspawner#data-persistence-and-dockerspawner
-lab_work_dir = '/home/jovyan/work' # os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
-lab_share_dir = '/home/jovyan/share'
+lab_work_dir = '/home/jovyan/work' # os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work' #  
 c.DockerSpawner.notebook_dir = lab_work_dir
 
+# Mount the real user's Docker volume on the host to the notebook user's
+# notebook directory in the container
+lab_share_dir = '/home/jovyan/share'
 volumes_dict = {'jupyterlab-share': lab_share_dir}
-if 'HOST_WORK_DIR' in list(os.environ):
-  volumes_dict[os.environ['HOST_WORK_DIR']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
+if 'DOCKER_NOTEBOOK_DIR_HOST' in list(os.environ):
+  volumes_dict[os.environ['DOCKER_NOTEBOOK_DIR_HOST']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
 else:
   volumes_dict['jupyterlab-user-{username}'] = lab_work_dir
 c.DockerSpawner.volumes = volumes_dict
 
+# Remove containers once they are stopped
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1", "True", "TRUE")
+rmcont = str2bool(os.environ['CONTAINER_NOTEBOOK_REMOVE']) if 'CONTAINER_NOTEBOOK_REMOVE' in list(os.environ) else True
+c.DockerSpawner.remove = rmcont
+
+# For debugging arguments passed to spawned containers
+c.DockerSpawner.debug = True
+# c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
+
+# User containers will access hub by container name on the Docker network
+c.JupyterHub.hub_ip = "jupyterhub"
+c.JupyterHub.hub_port = 8080
+
+# Persist hub data on volume mounted inside container
+c.JupyterHub.cookie_secret_file = "/data/jupyterhub_cookie_secret"
+c.JupyterHub.db_url = "sqlite:////data/jupyterhub.sqlite"
+
+# Authenticate users with Native Authenticator
+c.JupyterHub.authenticator_class = "nativeauthenticator.NativeAuthenticator"
+
+# Allow anyone to sign-up without approval
+c.NativeAuthenticator.open_signup = str2bool(os.environ['HUB_OPEN_SIGNUP'])
 
 # authenticator
-c.Authenticator.admin_users = {os.environ['HUB_ADMIN_USER']}
-c.Authenticator.check_common_password = True
-c.Authenticator.minimum_password_length = 6
-c.Authenticator.allowed_failed_logins = 3
+c.Authenticator.admin_users = {os.environ['HUB_ADMIN']}
+c.NativeAuthenticator.check_common_password = True
+c.NativeAuthenticator.minimum_password_length = 6
+c.NativeAuthenticator.allowed_failed_logins = 3
 
 
 # # Other stuff
@@ -70,4 +88,3 @@ c.JupyterHub.services = [
     }
 ]
 
-c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
