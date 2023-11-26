@@ -16,3 +16,6 @@ CMD ["jupyterhub", "-f", "/srv/jupyterhub/jupyterhub_config.py"]
 
 # docker image arch
 # docker image inspect --format "{{.ID}} {{.RepoTags}} {{.Architecture}}" $(docker image ls -q)
+
+# example
+# https://github.com/jupyterhub/jupyterhub-deploy-docker
