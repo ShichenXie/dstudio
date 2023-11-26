@@ -10,6 +10,9 @@ COPY ./jupyterhub_config.py /srv/jupyterhub/jupyterhub_config.py
 CMD ["jupyterhub", "-f", "/srv/jupyterhub/jupyterhub_config.py"]
 
 
-# docker build --platform linux/amd64 -t shichenxie/dstudio_hub:4.0 -f ./jupyterhub_Dockerfile .
+# docker build  --tag shichenxie/dstudio_hub:4.0 -f ./jupyterhub_Dockerfile .
+# docker buildx build --push --platform linux/arm64/v8,linux/amd64 -t shichenxie/dstudio_hub:4.0 -f ./jupyterhub_Dockerfile .
 # docker save shichenxie/dstudio_hub:1.2.2 -o ~/Downloads/dstudio_hub.t
 
+# docker image arch
+# docker image inspect --format "{{.ID}} {{.RepoTags}} {{.Architecture}}" $(docker image ls -q)

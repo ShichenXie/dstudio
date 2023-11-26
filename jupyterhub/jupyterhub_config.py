@@ -1,6 +1,3 @@
-# Copyright (c) Jupyter Development Team.
-# Distributed under the terms of the Modified BSD License.
-
 # Configuration file for JupyterHub
 import os
 import sys
@@ -33,8 +30,10 @@ c.DockerSpawner.notebook_dir = lab_work_dir
 
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
+# share volume 
 lab_share_dir = '/home/jovyan/share'
 volumes_dict = {'jupyterlab-share': lab_share_dir}
+# user volume
 if 'DOCKER_NOTEBOOK_DIR_HOST' in list(os.environ):
   volumes_dict[os.environ['DOCKER_NOTEBOOK_DIR_HOST']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
 else:
@@ -87,4 +86,3 @@ c.JupyterHub.services = [
         'command': [sys.executable, '-m', 'jupyterhub_idle_culler', hub_timeout],
     }
 ]
-
