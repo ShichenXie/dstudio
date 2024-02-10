@@ -23,7 +23,7 @@ services:
       # Allow anyone to sign-up without approval
       HUB_OPEN_SIGNUP: False
       # JupyterHub will spawn this Notebook image for users
-      LAB_IMAGE: shichenxie/dstudio_lab:4.0base,shichenxie/dstudio_lab:4.0
+      LAB_IMAGE: shichenxie/dstudio_lab:4.0,shichenxie/dstudio_lab:4.0base
       LAB_CONTAINER_REMOVE: True
       # Mount the directory on host to the notebook directory in the container
       LAB_DIR_HOST: 
