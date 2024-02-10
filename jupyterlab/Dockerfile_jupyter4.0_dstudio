@@ -18,7 +18,7 @@ ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
 ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN/
 
 ENV S6_VERSION=v2.1.0.2
-ENV RSTUDIO_VERSION=2023.09.1+494
+ENV RSTUDIO_VERSION=2023.12.0+369
 ENV DEFAULT_USER=${NB_USER}
 ENV PANDOC_VERSION=default
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
@@ -41,7 +41,7 @@ RUN /rocker_scripts/install_rstudio.sh && \
 ## conda install # 
 # conda install --quiet --yes pip && \    
 RUN conda install --quiet --yes JayDeBeApi openpyxl \ 
-        'r-png' 'r-odbc' 'r-RJDBC' 'r-RPostgres' && \
+        'r-png' 'r-odbc' 'r-RJDBC' 'r-RPostgres' 'r-protolite' && \
     conda clean --all -f -y && \ 
     rm -rf /tmp/* && \
     fix-permissions "${CONDA_DIR}" && \
@@ -55,9 +55,9 @@ RUN python3 -m pip install --no-cache xgboost sklearn2pmml jupyter-rsession-prox
 ## r-dbi https://github.com/r-dbi # service cron start ## 'RMySQL', 
 COPY echarts4r.maps-master.zip /tmp/echarts4r.maps-master.zip 
 RUN R --quiet -e "install.packages(c('RClickhouse', \
-        'reticulate', 'blastula', 'rjson', 'cronR', \
+        'reticulate', 'blastula', 'rjson', 'data.tree', 'RProtoBuf', 'cronR', \
         'blogdown', 'showtext', 'tidytext', 'stringdist', 'jiebaR',  \
-        'echarts4r', 'plotly', 'visNetwork', 'qgraph', \ 
+        'echarts4r', 'plotly', 'visNetwork', 'qgraph', 'ggExtra', \ 
         'xgboost', 'mlr3', 'scorecard', 'xefun', \
         'tsibble', 'fable', 'pedquant', 'webdriver'), repos='${CRAN_URL}'); \
         devtools::install_local('/tmp/echarts4r.maps-master.zip')"  && \ 

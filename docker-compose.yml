@@ -23,12 +23,12 @@ services:
       # Allow anyone to sign-up without approval
       HUB_OPEN_SIGNUP: False
       # JupyterHub will spawn this Notebook image for users
-      DOCKER_NOTEBOOK_IMAGE: shichenxie/dstudio_lab:4.0
-      CONTAINER_NOTEBOOK_REMOVE: False
+      LAB_IMAGE: shichenxie/dstudio_lab:4.0base,shichenxie/dstudio_lab:4.0
+      LAB_CONTAINER_REMOVE: True
       # Mount the directory on host to the notebook directory in the container
-      DOCKER_NOTEBOOK_DIR_HOST: 
+      LAB_DIR_HOST: 
       # All containers will join this network
-      DOCKER_NETWORK_NAME: jupyterhub-network
+      LAB_NETWORK_NAME: jupyterhub-network
       
 volumes:
   jupyterhub-data:

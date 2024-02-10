@@ -19,7 +19,8 @@ dstudio 是一个在 [jupyterlab 科学计算容器](https://hub.docker.com/r/ju
 ```
 # 直接下载 dstudio_hub 和 dstudio_lab image
 docker pull shichenxie/dstudio_hub:4.0
-docker pull shichenxie/dstudio_lab:4.0
+docker pull shichenxie/dstudio_lab:4.0 
+# lab image 还包括 4.0base（仅jupyterlab）、4.0r（rstudio+shiny）
 
 # 保存为离线文件
 # docker save shichenxie/dstudio_hub:4.0 -o ~/Downloads/dstudio_hub.tar
@@ -48,7 +49,7 @@ docker-compose up -d
 
 ### 管理员用户
 
-默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。登陆之后默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。
+默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。用户登陆之后，可以选择合适的image版本，默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。
 
 ![Jupyterlab](./img/jupyterlab.png)
 ![RstudioServer](./img/rstudioserver.png)
@@ -91,7 +92,7 @@ docker-compose up -d
 
 如果您对本项目感兴趣，欢迎star。如果有任何想法可以提交 issue 或者 pr。
 
-本项目适合中小型团队搭建在线建模分析平台，参考了 [defeo/jupyterhub-docker](https://github.com/defeo/jupyterhub-docker) 与 [jupyterhub/jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker)；对于大型团队需要集群扩展的可以参考 [zero-to-jupyterhub-k8s](https://zero-to-jupyterhub.readthedocs.io/en/stable/) 项目。
+本项目适合中小型团队在单服务器上搭建在线建模分析平台，参考了 [defeo/jupyterhub-docker](https://github.com/defeo/jupyterhub-docker) 与 [jupyterhub/jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker)；对于大型团队需要集群扩展的可以参考 [zero-to-jupyterhub-k8s](https://zero-to-jupyterhub.readthedocs.io/en/stable/) 项目。
 类似的项目还有 [ShinyStudio](https://github.com/dm3ll3n/ShinyStudio)，不过是基于  [shinyproxy](https://www.shinyproxy.io/) 开发的。
 
 本项目参考了以下内容或项目：

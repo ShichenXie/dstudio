@@ -3,6 +3,31 @@ import os
 import sys
 import nativeauthenticator
 
+labimage = os.environ["LAB_IMAGE"]
+
+
+from dockerspawner import DockerSpawner
+ops = ""
+for img in labimage.split(","):
+    disp = img.split("/")
+    disp = disp[1] if len(disp) ==2 else img
+    ops += """<option value="{img}">{disp}</option>\n""".format(img=img, disp=disp)
+class DemoFormSpawner(DockerSpawner):
+    def _options_form_default(self):
+        return """
+        <label for="stack">Select your desired stack</label>
+        <select name="stack" size="1">{stack}</select>
+        """.format(stack=ops)
+
+    def options_from_form(self, formdata):
+        options = {}
+        options['stack'] = formdata['stack']
+        container_image = ''.join(formdata['stack'])
+        print("SPAWN: " + container_image + " IMAGE" )
+        self.container_image = container_image
+        return options
+
+
 c = get_config()  # noqa: F821
 
 # We rely on environment variables to configure JupyterHub so that we
@@ -10,13 +35,14 @@ c = get_config()  # noqa: F821
 # configuration parameter.
 
 # Spawn single-user servers as Docker containers
-c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
+# c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
+c.JupyterHub.spawner_class = DemoFormSpawner
 
 # Spawn containers from this image
-c.DockerSpawner.image = os.environ["DOCKER_NOTEBOOK_IMAGE"]
+# c.DockerSpawner.image = labimage # os.environ["LAB_IMAGE"]
 
 # Connect containers to this Docker network
-network_name = os.environ["DOCKER_NETWORK_NAME"]
+network_name = os.environ["LAB_NETWORK_NAME"]
 c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.network_name = network_name
 
@@ -34,8 +60,8 @@ c.DockerSpawner.notebook_dir = lab_work_dir
 lab_share_dir = '/home/jovyan/share'
 volumes_dict = {'jupyterlab-share': lab_share_dir}
 # user volume
-if 'DOCKER_NOTEBOOK_DIR_HOST' in list(os.environ):
-  volumes_dict[os.environ['DOCKER_NOTEBOOK_DIR_HOST']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
+if 'LAB_DIR_HOST' in list(os.environ):
+  volumes_dict[os.environ['LAB_DIR_HOST']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
 else:
   volumes_dict['jupyterlab-user-{username}'] = lab_work_dir
 c.DockerSpawner.volumes = volumes_dict
@@ -43,7 +69,7 @@ c.DockerSpawner.volumes = volumes_dict
 # Remove containers once they are stopped
 def str2bool(v):
   return v.lower() in ("yes", "true", "t", "1", "True", "TRUE")
-rmcont = str2bool(os.environ['CONTAINER_NOTEBOOK_REMOVE']) if 'CONTAINER_NOTEBOOK_REMOVE' in list(os.environ) else True
+rmcont = str2bool(os.environ['LAB_CONTAINER_REMOVE']) if 'LAB_CONTAINER_REMOVE' in list(os.environ) else True
 c.DockerSpawner.remove = rmcont
 
 # For debugging arguments passed to spawned containers
