@@ -4,11 +4,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个在 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub/tags) 和 [jupyterlab 科学计算](https://hub.docker.com/r/jupyter/datascience-notebook/)容器基础上配置了 [rstudio server](https://posit.co/download/rstudio-server/) 与 [shiny server](https://posit.co/download/shiny-server/) 环境的应用。 dstudio 极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python 与 Julia 计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。本项目提供了一个开箱即用的免费开源方案，适用于中小型团队，也可以用于个人电脑上。
+dstudio 是一个在 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub/tags) 和 [jupyterlab](https://hub.docker.com/r/jupyter/datascience-notebook/) 容器基础上配置了 [rstudio server](https://posit.co/download/rstudio-server/) 与 [shiny server](https://posit.co/download/shiny-server/) 的应用。 dstudio 极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python（、Julia）计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。本项目提供了一个开箱即用的免费开源方案，适用于中小型团队，也可以用于个人电脑上。
 
 dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
 - 其中，dstudio_hub 负责用户管理，并调用 dstudio_lab 容器为每位用户自动生成独立的计算环境（container）；
-- dstudio_lab 为建模分析所需的 IDE（jupyterlab、rstudio）以及各类工具包，包含三个版本（dstudio_lab:4.0、dstudio_lab:4.0r、dstudio_lab:4.0base），用户可以根据自己的需要进行选择。
+- dstudio_lab 包含建模分析所需的 IDE（jupyterlab、rstudio）以及各类工具包，目前有三个版本（dstudio_lab:4.0、dstudio_lab:4.0r、dstudio_lab:4.0base），用户可以根据自己的需要进行选择。
 
 ![login](./img/login.png)
 
@@ -36,7 +36,7 @@ docker pull shichenxie/dstudio_lab:4.0base
 
 ### 启动服务
 
-该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目的根目录中已经提供了，可以通过命令行下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，或者直接手动复制保存。然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，最终实现浏览器访问。
+该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目的根目录中已经提供了，可以通过命令行下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，或者直接手动复制保存。然后在 terminal 中进入该文件所在的目录，并运行以下代码就启动服务了，最终实现浏览器访问。
 
 ```
 # 启动服务
@@ -64,9 +64,9 @@ docker-compose up -d
 
 每个用户登陆之后默认进入 `～/work` 文件夹，该文件夹将默认固化至 `jupyterlab-user-xxx` volume（xxx 为用户名），从而持久化保存用户的个人文件。在服务器的 terminal 中可通过 `docker volume ls` 查看所有 volume。
 
-在 `～/work` 文件夹中还有一个 share 文件夹指向 `～/share`，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume。所有用户的 share 文件夹都固化至同一个 volume，从而实现多用户之间的文件共享。
+在 `～/work` 文件夹中还有一个 share 文件夹链接指向 `～/share`，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume。所有用户的 share 文件夹都固化至同一个 volume，从而实现多用户之间的文件共享。
 
-如果在个人电脑上使用，可以将 `～/work` 文件夹指向个人电脑的文件夹，需要将 docker-compose.yml 文件中的 LAB_DIR_HOST 参数配置为对应文件夹路径。
+如果在个人电脑上使用，可以将 `～/work` 文件夹指向个人电脑的文件夹，需要将 docker-compose.yml 中的 LAB_DIR_HOST 参数配置为对应文件夹路径。
 
 ### R 与 Python
 
