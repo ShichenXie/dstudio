@@ -36,7 +36,7 @@ docker pull shichenxie/dstudio_lab:4.0base
 
 ### 启动服务
 
-该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目的根目录中已经提供了，可以通过命令行下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，或者直接手动复制保存。然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，最终实现浏览器访问。如果部署在个人电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
+该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目的根目录中已经提供了，可以通过命令行下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，或者直接手动复制保存。然后在 terminal 中进入保存了该文件的目录，并运行以下代码就启动服务了，最终实现浏览器访问。
 
 ```
 # 启动服务
@@ -45,23 +45,18 @@ docker-compose up -d
 # 停止服务
 # docker-compose down
 ```
+如果部署在个人电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
+- 登陆页面：`http://localhost:8000/`
+- 用户授权：`http://localhost:8000/hub/authorize`
+- 更改密码：`http://localhost:8000/hub/change-password`
 
-## 用户登陆与新建
+### 用户登陆与新建
 
-### 管理员用户
-
-默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN_USER 参数进行修改。管理员的密码和普通用户的一样，都需要通过点击 Signup 进入注册页面在创建用户时生成。然后点击 Login，回到登陆页输入用户名和设定的密码。用户登陆之后，可以选择合适的image版本，默认进入 jupyterLab 页面，可在下拉菜单 File 中退出登陆 (Log Out)，或进入管理页面 (Hub Control Panel)。
+所有用户（包括管理员）首次登陆时，都需要在登陆页面点击 Signup 进入注册页面进行创建。用户注册之后点击 Login，回到登陆页进行登录。管理员用户注册后可直接登录，普通用户需要管理员的审批授权才能登录。默认进入 jupyterLab 页面，用户登陆之后，可以选择合适的 dstudio_lab 版本。用户登出在下拉菜单 File 中退出登陆 (Log Out)，管理员还可以进入管理页面 (Hub Control Panel)。
+- 默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN 参数进行修改。
 
 ![Jupyterlab](./img/jupyterlab.png)
 ![RstudioServer](./img/rstudioserver.png)
-
-### 普通用户
-
-先在登陆页面 `http://localhost:8000/` 点击 Signup，进入注册页面新建用户并设定密码，假设新用户名为 test。然后由管理员审批，审批页面链接为 `http://localhost:8000/hub/authorize`。审批之后就完成了新用户的创建。
-
-### 修改密码
-
-用原密码登陆之后，进入 `http://localhost:8000/hub/change-password` 页面可以更新密码。
 
 ## 功能简介
 
