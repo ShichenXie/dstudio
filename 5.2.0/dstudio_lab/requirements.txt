@@ -1,0 +1,6 @@
+polars
+xgboost
+sklearn2pmml
+scorecardpy
+jupyter-rsession-proxy
+jupyter-shiny-proxy

@@ -1,0 +1,113 @@
+FROM quay.io/jupyter/datascience-notebook:hub-5.2.0
+
+USER root
+WORKDIR /
+
+# rstudio server ------------------ 
+ENV R_VERSION="4.3.3"
+ENV R_HOME="/opt/conda/lib/R"
+ENV R_LIB="/opt/conda/lib/R/library"
+ENV CRAN="https://packagemanager.rstudio.com/all/__linux__/focal/latest"
+ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN/
+
+ENV TZ="Etc/UTC"
+ENV LANG=en_US.UTF-8
+ENV S6_VERSION="v2.1.0.2"
+ENV SHINY_SERVER_VERSION="latest"
+ENV DEFAULT_USER=${NB_USER}
+ENV PANDOC_VERSION="default"
+
+COPY scripts /rocker_scripts
+RUN /rocker_scripts/install_s6init.sh && \
+    /rocker_scripts/install_shiny_server.sh && \
+    chown -R $NB_UID:$NB_UID /srv/shiny-server/ && \
+    chown -R $NB_UID:$NB_UID /var/lib/shiny-server && \
+    chown -R $NB_UID:$NB_UID /var/log/shiny-server && \
+    apt-get update && \
+    apt-get install -y qpdf cron default-jdk && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*  && \
+    rm -rf /tmp/* && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# pkgs ------------------
+## conda install # 
+# conda install --quiet --yes pip && \    
+RUN conda install --quiet --yes JayDeBeApi openpyxl \ 
+        'r-png' 'r-odbc' 'r-RJDBC' 'r-RPostgres' 'r-protolite' && \
+    conda clean --all -f -y && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+## pip install # -i https://pypi.tuna.tsinghua.edu.cn/simple 
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+## CRAN install 
+## r-dbi https://github.com/r-dbi # service cron start ## 'RMySQL', 
+COPY echarts4r.maps-master.zip /tmp/echarts4r.maps-master.zip 
+RUN R --quiet -e "install.packages(c('RClickhouse', \
+        'reticulate', 'blastula', 'rjson', 'data.tree', 'RProtoBuf', 'cronR', \
+        'blogdown', 'showtext', 'tidytext', 'stringdist', 'jiebaR',  \
+        'echarts4r', 'plotly', 'visNetwork', 'qgraph', 'ggExtra', \ 
+        'xgboost', 'mlr3', 'scorecard', 'xefun', \
+        'tsibble', 'fable', 'pedquant', 'webdriver'), repos='${CRAN_URL}'); \
+        devtools::install_local('/tmp/echarts4r.maps-master.zip')"  && \ 
+    rm -rf /tmp/* && \ 
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+
+# setting for service cron start
+RUN chmod gu+rw /var/run/ && \
+    chmod gu+s  /usr/sbin/cron
+
+# pkgs shiny ------------------
+RUN R --quiet -e "install.packages(c( \
+        'golem', 'shinipsum', 'fakir', 'gemstones', 'attachment', \
+        'flexdashboard', 'bs4Dash', 'shinydashboard', 'shinydashboardPlus', \
+        'shinyFeedback', 'shinyWidgets', 'kableExtra', 'DT', \
+        'bslib', 'sass', 'thematic', 'htmltools', 'jquerylib', 'htmlwidgets', \
+        'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
+         'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${R_HOME}" && \
+    fix-permissions "/home/${NB_USER}" 
+
+# setting jupyter_shiny_proxy home directory to /srv/shiny-server
+RUN cd /opt/conda/lib/python3.11/site-packages/jupyter_shiny_proxy &&  \
+    awk '{sub(/os.getcwd\(\)/,"\"/srv/shiny-server\"")}1' __init__.py > /tmp/temp.py && mv /tmp/temp.py __init__.py && \ 
+    cd /
+
+# startup ------------------
+# R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
+RUN echo 'options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/", CRANextra = "https://cran.rstudio.com/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site
+# R_HOME, R_LIBS, LD_LIBRARY_PATH, PATH
+
+# jupyterlab config
+COPY ./config/overrides.json /opt/conda/share/jupyter/lab/settings/
+
+# disable download/terminal
+RUN jupyter labextension disable @jupyterlab/docmanager-extension:download && \ 
+    jupyter labextension disable @jupyterlab/filebrowser-extension:download && \
+    pip uninstall -y terminado 
+
+
+# share folder
+RUN mkdir -p /home/jovyan/share && \
+    ln -s /home/jovyan/share /home/jovyan/work/share && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# set localtime
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+WORKDIR $HOME
+USER $NB_UID
+
+# docker build --platform linux/amd64 -t shichenxie/dstudio_lab:5.2.0_limit -f ./Dockerfile_lab5.2.0_limit .
+# docker build --progress=plain --no-cache  --platform linux/amd64 -t shichenxie/dstudio_lab:4.0 -f ./Dockerfile_labds_jupyter4.0 .
+

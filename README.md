@@ -8,7 +8,7 @@ dstudio 是一个在 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub
 
 dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
 - 其中，dstudio_hub 负责用户管理，并调用 dstudio_lab 容器为每位用户自动生成独立的计算环境（container）；
-- dstudio_lab 包含建模分析所需的 IDE（jupyterlab、rstudio）以及各类工具包，目前有三个版本（dstudio_lab:4.0、dstudio_lab:4.0r、dstudio_lab:4.0base），用户可以根据自己的需要进行选择。
+- dstudio_lab 包含建模分析所需的 IDE（jupyterlab、rstudio），数据可视化展示的 shiny，以及各类工具包。
 
 ![login](./img/login.png)
 
@@ -22,13 +22,13 @@ dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
 
 ```
 # 直接下载 dstudio_hub 和 dstudio_lab image
-docker pull shichenxie/dstudio_hub:4.0
-docker pull shichenxie/dstudio_lab:4.0
-docker pull shichenxie/dstudio_lab:4.0base 
+docker pull shichenxie/dstudio_hub:5.2.0
+docker pull shichenxie/dstudio_lab:5.2.0 # 管理员
+docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户默认使用，删除了文件下载功能 与 rstudio server
 
 # 保存为离线文件
-# docker save shichenxie/dstudio_hub:4.0 -o ~/Downloads/dstudio_hub.tar
-# docker save shichenxie/dstudio_lab:4.0 -o ~/Downloads/dstudio_lab.tar
+# docker save shichenxie/dstudio_hub:5.2.0 -o ~/Downloads/dstudio_hub.tar
+# docker save shichenxie/dstudio_lab:5.2.0 -o ~/Downloads/dstudio_lab.tar
 # 加载本地的 image
 # docker load --input dstudio_hub.tar
 # docker load --input dstudio_lab.tar
@@ -36,7 +36,7 @@ docker pull shichenxie/dstudio_lab:4.0base
 
 ### 启动服务
 
-该服务通过 docker compose 启动。首先在服务器中下载 docker-compose.yml 文件，该文件在本项目的根目录中已经提供了，可以通过命令行下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，或者直接手动复制保存。然后在 terminal 中进入该文件所在的目录，并运行以下代码就启动服务了，最终实现浏览器访问。
+首先选择相应的版本，下载 docker-compose.yml 文件。可以直接通过命令行的形式下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，也可以通过手动复制保存。然后在 terminal 中进入 docker-compose.yml 文件所在的目录，运行 `docker-compose up -d` 启动服务，就可以通过浏览器访问 dstudio 了。
 
 ```
 # 启动服务
@@ -45,15 +45,15 @@ docker-compose up -d
 # 停止服务
 # docker-compose down
 ```
-如果部署在个人电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的ip地址，注意服务器需要开通 8000 端口的网络访问权限。
+如果部署在个人电脑上，访问地址为 `http://localhost:8000/`；如果部署在服务器上，将 localhost 替换为对应服务器的 ip 地址，注意服务器需要开通 8000 端口的网络访问权限。
 - 登陆页面：`http://localhost:8000/`
 - 用户授权：`http://localhost:8000/hub/authorize`
 - 更改密码：`http://localhost:8000/hub/change-password`
 
 ### 用户登陆与新建
 
-所有用户（包括管理员）首次登陆时，都需要在登陆页面点击 Signup 进入注册页面进行创建。用户注册之后点击 Login，回到登陆页进行登录。管理员用户注册后可直接登录，普通用户需要管理员的审批授权才能登录。默认进入 jupyterLab 页面，用户登陆之后，可以选择合适的 dstudio_lab 版本。用户登出在下拉菜单 File 中退出登陆 (Log Out)，管理员还可以进入管理页面 (Hub Control Panel)。
-- 默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN 参数进行修改。
+所有用户（包括管理员）首次登陆时，都需要在登陆页面点击 Signup 进入注册页面创建。用户注册之后点击 Login，回到登陆页登录。管理员用户注册后可直接登录，普通用户需要管理员审批授权后才能登录。默认进入 jupyterLab 页面。用户登出在下拉菜单 File 中退出登陆 (Log Out)，管理员还可以进入管理页面 (Hub Control Panel)。
+- 默认的管理员用户为 dstudio，该账号可以通过 docker-compose.yml 中的 HUB_ADMIN 参数配置。
 
 ![Jupyterlab](./img/jupyterlab.png)
 ![RstudioServer](./img/rstudioserver.png)
@@ -67,6 +67,10 @@ docker-compose up -d
 在 `～/work` 文件夹中还有一个 share 文件夹链接指向 `～/share`，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume。所有用户的 share 文件夹都固化至同一个 volume，从而实现多用户之间的文件共享。
 
 如果在个人电脑上使用，可以将 `～/work` 文件夹指向个人电脑的文件夹，需要将 docker-compose.yml 中的 LAB_DIR_HOST 参数配置为对应文件夹路径。
+
+### 文件下载权限
+
+文件的下载功能仅限管理员用户。普通用户如果需要下载文件可以先共享给管理员，再由管理员下载。如果希望普通用户也拥有文件下载功能，可以将 docker-compose.yml 中的 LAB_IMAGE_USER 参数设置成与 LAB_IMAGE_ADMIN 的一致。
 
 ### R 与 Python
 

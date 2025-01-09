@@ -1,0 +1,36 @@
+# ubuntu 22.04
+
+# 清华大学镜像
+deb [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+deb [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
+
+# 阿里云镜像
+deb [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+deb-src [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy main restricted universe multiverse
+deb [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+deb-src [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-security main restricted universe multiverse
+deb [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb-src [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-updates main restricted universe multiverse
+deb [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
+deb-src [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
+deb [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+deb-src [trusted=yes] http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
+
+# 中科大镜像
+deb [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+deb [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
+deb [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+deb-src [trusted=yes] https://mirrors.ustc.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+

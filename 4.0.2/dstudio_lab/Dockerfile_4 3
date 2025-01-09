@@ -1,0 +1,23 @@
+FROM jupyter/base-notebook:hub-4.0.2   
+# docker pull jupyter/base-notebook:hub-4.0.2 --platform linux/amd64
+
+USER root
+WORKDIR /
+
+# startup ------------------
+# jupyterlab config
+COPY ./config/overrides.json /opt/conda/share/jupyter/lab/settings/
+
+RUN mkdir -p /home/jovyan/share && \
+    ln -s /home/jovyan/share /home/jovyan/work/share && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# set localtime
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+WORKDIR $HOME
+USER $NB_UID
+
+# docker build --platform linux/amd64 -t shichenxie/dstudio_lab:4.0base -f ./Dockerfile_4.0base .
+# docker build --progress=plain --no-cache --platform linux/amd64 -t shichenxie/dstudio_lab:4.0base -f ./Dockerfile_4.0base .

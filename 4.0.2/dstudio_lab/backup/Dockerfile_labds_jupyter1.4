@@ -1,0 +1,112 @@
+FROM jupyter/datascience-notebook:hub-1.4.2
+# https://hub.docker.com/r/jupyter/datascience-notebook/
+
+WORKDIR /
+USER root
+# set local source.list
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+COPY ./linux_source/sources_ubuntu.list /etc/apt/sources.list
+
+# rstudio server / shiny ------------------ 
+COPY scripts /rocker_scripts
+
+ENV R_HOME=/opt/conda/lib/R
+ENV R_LIB=/opt/conda/lib/R/library
+ENV CRAN=https://packagemanager.rstudio.com/all/__linux__/focal/latest
+ARG CRAN_URL=https://mirrors.tuna.tsinghua.edu.cn/CRAN
+
+ENV S6_VERSION=v2.1.0.2
+ENV RSTUDIO_VERSION=1.4.1717
+ENV PANDOC_VERSION=default
+
+ENV PATH=/usr/lib/rstudio-server/bin:$PATH
+RUN /rocker_scripts/install_rstudio.sh && \
+    /rocker_scripts/install_pandoc.sh && \
+    /rocker_scripts/install_shiny_server.sh && \
+    ## folder permission
+    chown -R $NB_UID:$NB_UID /srv/shiny-server/ && \
+    chown -R $NB_UID:$NB_UID /var/lib/shiny-server && \
+    chown -R $NB_UID:$NB_UID /var/log/shiny-server && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# pkgs ------------------
+# py pgks
+ENV RSESSION_PROXY_RSTUDIO_1_4=yes
+RUN conda install --quiet --yes pip && \
+    python3 -m pip install --upgrade https://github.com/jupyterhub/jupyter-rsession-proxy/tarball/master &&\
+    python3 -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache \
+        xgboost \
+        sklearn2pmml \
+        jupyter-shiny-proxy && \ 
+    rm -rf /tmp/* && \
+    ## conda install
+    conda install --quiet --yes 'JayDeBeApi' 'openpyxl' && \
+    conda clean --all -f -y && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# r pkgs 
+# r-dbi https://github.com/r-dbi # service cron start
+RUN apt-get update && \
+    apt-get install -y \
+        qpdf \
+        cron \
+        default-jdk && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    # conda install r pkgs
+    conda install --quiet --yes \
+        'r-png' 'r-reticulate' \
+        'r-odbc' 'r-rjdbc' 'r-rpostgres' \
+        'r-mlr3' 'r-scorecard' \
+        'r-pkgdown' 'r-blogdown' && \
+    conda clean --all -f -y && \
+    ## install.packages r pkgs
+    R --quiet -e "install.packages(c('RClickhouse', 'blastula', 'rjson', 'xgboost', 'tsibble', 'fable'), repos='${CRAN_URL}'); devtools::install_github('bnosac/cronR')"  && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# shiny https://xiangyun.rbind.io/2021/08/shiny-in-production/
+RUN R --quiet -e "install.packages(c( \
+        'flexdashboard', 'bs4Dash', 'shinydashboard', 'shinydashboardPlus', \
+        'shinyFeedback', 'shinyWidgets', \
+        'bslib', 'sass', 'thematic', 'htmltools', 'jquerylib', 'htmlwidgets', \
+        'plotly', 'echarts4r', 'leaflet', 'leaflet.minicharts', 'visNetwork', \
+        'shinythemes', 'shinycssloaders', 'shinyBS', 'shiny.i18n', 'shinyFiles', 'miniUI', \
+         'sparkline', 'incidence', 'EpiEstim'), repos='${CRAN_URL}')"  && \ 
+    rm -rf /tmp/* && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}"
+
+# setting jupyter_shiny_proxy home directory to /srv/shiny-server
+RUN cd /opt/conda/lib/python3.9/site-packages/jupyter_shiny_proxy &&  \
+    awk '{sub(/os.getcwd\(\)/,"\"/srv/shiny-server\"")}1' __init__.py > /tmp/temp.py && mv /tmp/temp.py __init__.py && \ 
+    cd /
+# setting for service cron start
+RUN chmod gu+rw /var/run/ && \
+    chmod gu+s  /usr/sbin/cron
+
+# startup ------------------
+# R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
+RUN echo 'options(repos = c(CRAN = "https://cran.rstudio.com/", CRANextra = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site
+# R_HOME, R_LIBS, LD_LIBRARY_PATH, PATH
+
+# rstudio server config
+RUN echo 'session-default-working-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf && \
+    echo 'session-default-new-project-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf
+COPY ./config/rstudio-prefs.json /etc/rstudio/rstudio-prefs.json
+
+RUN mkdir -p /home/jovyan/share && \
+    ln -s /home/jovyan/share /home/jovyan/work/share && \
+    fix-permissions "/home/${NB_USER}"
+
+WORKDIR $HOME
+USER $NB_UID
+
+
+# docker build -t shichenxie/dstudio_lab:ds1.4.2 -f ./Dockerfile_labds_jupyter1.4 .
+
+# fix openssl issue # https://github.com/tschaffter/rstudio/issues/1
+# RUN conda remove --force -y openssl
