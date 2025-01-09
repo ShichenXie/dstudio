@@ -28,7 +28,7 @@ services:
       # Mount the directory on host to the notebook directory in the container
       LAB_DIR_HOST: 
       HUB_DEFAULT_URL: /lab
-      HUB_TIMEOUT: 180 # seconds
+      HUB_TIMEOUT: 129600 # seconds
       # Allow anyone to sign-up without approval
       HUB_OPEN_SIGNUP: False
       LAB_CONTAINER_REMOVE: True

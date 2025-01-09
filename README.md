@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个在 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub/tags) 和 [jupyterlab](https://hub.docker.com/r/jupyter/datascience-notebook/) 容器基础上配置了 [rstudio server](https://posit.co/download/rstudio-server/) 与 [shiny server](https://posit.co/download/shiny-server/) 的应用。 dstudio 极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python（、Julia）计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。本项目提供了一个开箱即用的免费开源方案，适用于中小型团队，也可以用于个人电脑上。
+dstudio 是一个在 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub/tags) 和 [jupyterlab](https://hub.docker.com/r/jupyter/datascience-notebook/) 容器基础上配置了 [rstudio server](https://posit.co/download/rstudio-server/) 与 [shiny server](https://posit.co/download/shiny-server/) 的应用。 dstudio 极大的简化了在线建模分析展示平台的搭建。部署在服务器上之后，支持多用户通过浏览器远程登陆 R 、Python（Julia）计算环境，并部署 shiny 服务，一方面可以充分利用服务器的计算资源，另一方面便于团队内成员建模分析环境的配置与管理。本项目提供了一个开箱即用的免费开源方案，适用于中小型团队，也可以用于个人电脑上。
 
 dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
 - 其中，dstudio_hub 负责用户管理，并调用 dstudio_lab 容器为每位用户自动生成独立的计算环境（container）；
@@ -36,7 +36,7 @@ docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户默认使用，删除�
 
 ### 启动服务
 
-首先选择相应的版本，下载 docker-compose.yml 文件。可以直接通过命令行的形式下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，也可以通过手动复制保存。然后在 terminal 中进入 docker-compose.yml 文件所在的目录，运行 `docker-compose up -d` 启动服务，就可以通过浏览器访问 dstudio 了。
+首先选择相应的版本（最新版为5.2，该版本号为jupyterhub的），下载 docker-compose.yml 文件。可以直接通过命令行的形式下载 (`curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/docker-compose.yml --output docker-compose.yml`)，也可以通过手动复制保存。然后在 terminal 中进入 docker-compose.yml 文件所在的目录，运行 `docker-compose up -d` 启动服务，就可以通过浏览器访问 dstudio 了。
 
 ```
 # 启动服务
