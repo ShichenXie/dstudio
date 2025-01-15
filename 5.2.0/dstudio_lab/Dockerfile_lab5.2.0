@@ -112,7 +112,9 @@ RUN echo 'options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/",
 
 # rstudio server config
 # https://github.com/rstudio/rstudio/issues/14060
-RUN echo "rsession-ld-library-path=/opt/conda/lib" >> /etc/rstudio/rserver.conf
+RUN echo "rsession-ld-library-path=/opt/conda/lib" >> /etc/rstudio/rserver.conf && \
+    echo "auth-timeout-minutes=0" >> /etc/rstudio/rserver.conf && \
+    echo "auth-stay-signed-in-days=15" >> /etc/rstudio/rserver.conf 
 
 RUN echo 'session-default-working-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf && \
     echo 'session-default-new-project-dir=/home/jovyan/work' >> /etc/rstudio/rsession.conf

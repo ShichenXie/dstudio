@@ -1,26 +1,26 @@
-# JupyterHub docker compose configuration file
+version: '3.5'
 
 services:
-  hub:
+  jupyterhub:
     platform: linux/amd64
-    restart: always
     image: shichenxie/dstudio_hub:5.2.0
     container_name: jupyterhub
+    restart: always
     networks:
-      - jupyterhub-network
+      - dstudio_net
     volumes:
       # Bind Docker socket on the host so we can connect to the daemon from
       # within the container
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
       # Bind Docker volume on host for JupyterHub database and cookie secrets
-      - "jupyterhub-data:/data"
+      - "jupyterhub_data:/data"
     ports:
       - "8000:8000"
     environment:
       # This username will be a JupyterHub admin
       JUPYTERHUB_ADMIN: dstudio
       # All containers will join this network
-      DOCKER_NETWORK_NAME: jupyterhub-network
+      DOCKER_NETWORK_NAME: dstudio_net
       # JupyterHub will spawn this Notebook image for admin
       LAB_IMAGE_ADMIN: shichenxie/dstudio_lab:5.2.0
       # JupyterHub will spawn this Notebook image for users
@@ -33,9 +33,11 @@ services:
       HUB_OPEN_SIGNUP: False
       LAB_CONTAINER_REMOVE: True
 
-volumes:
-  jupyterhub-data:
-
 networks:
-  jupyterhub-network:
-    name: jupyterhub-network
+  dstudio_net:
+    driver: bridge
+    name: dstudio_net
+
+volumes:
+  jupyterhub_data:
+    name: jupyterhub_data

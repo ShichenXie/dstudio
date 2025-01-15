@@ -52,7 +52,7 @@ volumes_dict = {'jupyterlab-share': '/home/jovyan/share'}
 if 'LAB_DIR_HOST' in list(os.environ):
   volumes_dict[os.environ['LAB_DIR_HOST']+'/{username}'] = {"bind": lab_work_dir, "mode": "rw"}
 else:
-  volumes_dict['jupyterhub-user-{username}'] = lab_work_dir
+  volumes_dict['jupyterlab-user-{username}'] = lab_work_dir
 c.DockerSpawner.volumes = volumes_dict
 
 # Remove containers once they are stopped
