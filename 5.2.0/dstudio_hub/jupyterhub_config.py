@@ -19,7 +19,7 @@ c = get_config()  # noqa: F821
 # setting image for each user
 def image_for_user(user):
     "Given a user, return the right image"""
-    if user.name == os.environ.get("JUPYTERHUB_ADMIN"):
+    if user.name == os.environ.get("JUPYTERHUB_ADMIN") or user.admin is True:
         return os.environ["LAB_IMAGE_ADMIN"]
     else:
         return os.environ["LAB_IMAGE_USER"]
