@@ -30,8 +30,8 @@ services:
       HUB_DEFAULT_URL: /lab
       HUB_TIMEOUT: 129600 # seconds
       # Allow anyone to sign-up without approval
-      HUB_OPEN_SIGNUP: False
-      LAB_CONTAINER_REMOVE: True
+      HUB_OPEN_SIGNUP: F
+      LAB_CONTAINER_REMOVE: T
 
 networks:
   dstudio_net:

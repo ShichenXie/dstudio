@@ -24,14 +24,16 @@ dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
 # 直接下载 dstudio_hub 和 dstudio_lab image
 docker pull shichenxie/dstudio_hub:5.2.0
 docker pull shichenxie/dstudio_lab:5.2.0 # 管理员
-docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户默认使用，删除了文件下载功能 与 rstudio server
+docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户默认使用，删除了文件下载功能与 rstudio server。如果不需要限制普通用户的下载权限，可以不用下载本容器
 
 # 保存为离线文件
 # docker save shichenxie/dstudio_hub:5.2.0 -o ~/Downloads/dstudio_hub.tar
 # docker save shichenxie/dstudio_lab:5.2.0 -o ~/Downloads/dstudio_lab.tar
+# docker save shichenxie/dstudio_lab:5.2.0ds -o ~/Downloads/dstudio_lab_ds.tar
 # 加载本地的 image
 # docker load --input dstudio_hub.tar
 # docker load --input dstudio_lab.tar
+# docker load --input dstudio_lab_ds.tar
 ```
 
 ### 启动服务
