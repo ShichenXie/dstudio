@@ -47,7 +47,7 @@ docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户计算环境（限制�
 
 ### 启动服务
 
-- **下载配置文件** 可以直接通过命令行的形式下载，也可以手动复制保存。
+- **下载配置文件** 可以直接通过命令行的形式下载，也可以手动复制保存。如果部署在服务器上，请将 docker-compose.yml 中的 localhost 替换为服务器IP地址。
 
 ```
 curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/5.2.0/docker-compose.yml
