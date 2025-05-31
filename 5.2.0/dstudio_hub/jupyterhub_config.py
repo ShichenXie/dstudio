@@ -16,6 +16,16 @@ c = get_config()  # noqa: F821
 # Spawn containers from this image
 # c.DockerSpawner.image = os.environ["LAB_IMAGE_ADMIN"]
 
+# check user format
+def defaulturl_for_user(user):
+    lab_users_str = os.environ.get("LAB_USERS", "") 
+    lab_users = [u.strip() for u in lab_users_str.split(",") if u.strip()]  # 去除空格
+
+    if user.name == os.environ.get("JUPYTERHUB_ADMIN") or user.admin is True or (user.name in lab_users):
+        return os.environ['HUB_DEFAULT_URL']
+    else:
+        return '/shiny'
+
 # setting image for each user
 def image_for_user(user):
     "Given a user, return the right image"""
@@ -28,6 +38,7 @@ from dockerspawner import DockerSpawner
 class MyDockerSpawner(DockerSpawner):
     def start(self):
         self.image = image_for_user(self.user)
+        self.default_url = defaulturl_for_user(self.user)
         return super().start()
 c.JupyterHub.spawner_class = MyDockerSpawner
 
@@ -62,7 +73,9 @@ def str2bool(v):
 c.DockerSpawner.remove = str2bool(os.environ['LAB_CONTAINER_REMOVE'])
 
 # jupyterhub default url
-c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
+# c.DockerSpawner.default_url = os.environ['HUB_DEFAULT_URL']
+
+    
 # For debugging arguments passed to spawned containers
 c.DockerSpawner.debug = True
 
@@ -74,8 +87,6 @@ c.JupyterHub.hub_port = 8080
 c.JupyterHub.cookie_secret_file = "/data/jupyterhub_cookie_secret"
 c.JupyterHub.db_url = "sqlite:////data/jupyterhub.sqlite"
 
-# Allow all signed-up users to login
-c.Authenticator.allow_all = True
 
 # Authenticate users with Native Authenticator
 import nativeauthenticator
@@ -84,16 +95,24 @@ c.JupyterHub.authenticator_class = "nativeauthenticator.NativeAuthenticator"
 # Allow anyone to sign-up without approval
 c.NativeAuthenticator.open_signup = str2bool(os.environ['HUB_OPEN_SIGNUP'])
 
+
 # Allowed admins
 admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
     c.Authenticator.admin_users = [admin]
+
+# Allow all signed-up users to login
+c.Authenticator.allow_all = True
+
+c.Authenticator.auth_refresh_age = 300  # 每 5 分钟刷新权限
+c.Authenticator.session_timeout = os.environ['HUG_LOGIN_TIMEOUT']   # 30分钟无操作后登出
+c.JupyterHub.cookie_max_age_days = 0.5  # 会话最长持续 12 小时
 
 # Services
 import sys
 c.JupyterHub.services = [
     {
         "name": "idle-culler",
-        "command": [sys.executable, "-m", "jupyterhub_idle_culler", '--timeout='+os.environ['HUB_TIMEOUT']],
+        "command": [sys.executable, "-m", "jupyterhub_idle_culler", '--timeout='+os.environ['HUB_CULL_TIMEOUT']],
     }
 ]

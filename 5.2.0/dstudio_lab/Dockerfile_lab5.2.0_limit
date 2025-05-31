@@ -84,7 +84,8 @@ RUN cd /opt/conda/lib/python3.11/site-packages/jupyter_shiny_proxy &&  \
 # startup ------------------
 # R startup # https://rviews.rstudio.com/2017/04/19/r-for-enterprise-understanding-r-s-startup/
 RUN echo 'options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/", CRANextra = "https://cran.rstudio.com/"))' >> /opt/conda/lib/R/etc/Rprofile.site && \
-    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site
+    echo 'RETICULATE_PYTHON = "/opt/conda/bin/python"' >> /opt/conda/lib/R/etc/Renviron.site 
+
 # R_HOME, R_LIBS, LD_LIBRARY_PATH, PATH
 
 # jupyterlab config
@@ -104,6 +105,14 @@ RUN mkdir -p /home/jovyan/share && \
 
 # set localtime
 RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+# 创建 ~/.jupyterhub_user 写入hub用户名
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["tini", "-g", "--", "/usr/local/bin/entrypoint.sh"]
+
+# 设置默认命令为启动 JupyterLab
+CMD ["start-notebook.sh"]
 
 WORKDIR $HOME
 USER $NB_UID

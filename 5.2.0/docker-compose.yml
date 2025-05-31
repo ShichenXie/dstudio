@@ -1,6 +1,26 @@
 version: '3.5'
 
 services:
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    restart: always
+    command:
+      # - "--api.insecure=true"  # 开启 Traefik 的 API 界面，方便调试
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"  # 默认不暴露所有容器
+      - "--entrypoints.web.address=:80"  # 定义 HTTP 入口
+      # 禁用 API 和 Dashboard
+      - "--api.dashboard=false"
+      - "--api.insecure=false"
+    ports:
+      - "80:80"  # HTTP 端口
+      # - "8080:8080"  # Traefik 管理界面端口
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"  # 挂载 Docker 套接字
+    networks:
+      - dstudio_net
+      
   jupyterhub:
     platform: linux/amd64
     image: shichenxie/dstudio_hub:5.2.0
@@ -14,11 +34,16 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:rw"
       # Bind Docker volume on host for JupyterHub database and cookie secrets
       - "jupyterhub_data:/data"
-    ports:
-      - "8000:8000"
+    labels:
+      - "traefik.enable=true"  # 启用 Traefik 代理
+      - "traefik.http.routers.jupyterhub.rule=Host(`localhost`)"  # 定义路由规则
+      - "traefik.http.routers.jupyterhub.entrypoints=web"  # 指定入口点
+      - "traefik.http.services.jupyterhub.loadbalancer.server.port=8000"  # 指定服务端口
     environment:
       # This username will be a JupyterHub admin
       JUPYTERHUB_ADMIN: dstudio
+      # non-admin users will log into shiny, except the lab users
+      LAB_USERS: 
       # All containers will join this network
       DOCKER_NETWORK_NAME: dstudio_net
       # JupyterHub will spawn this Notebook image for admin
@@ -28,7 +53,10 @@ services:
       # Mount the directory on host to the notebook directory in the container
       LAB_DIR_HOST: 
       HUB_DEFAULT_URL: /lab
-      HUB_TIMEOUT: 129600 # seconds
+      # Cull idle servers after 1.5 days inactivity
+      HUB_CULL_TIMEOUT: 129600
+      # Session expires after 30 mins inactivity
+      HUG_LOGIN_TIMEOUT: 1800
       # Allow anyone to sign-up without approval
       HUB_OPEN_SIGNUP: F
       LAB_CONTAINER_REMOVE: T
