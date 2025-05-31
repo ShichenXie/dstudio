@@ -4,11 +4,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-dstudio 是一个基于 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub/tags) 和 [jupyterlab](https://hub.docker.com/r/jupyter/datascience-notebook/) 容器构建的数据分析平台，集成了 [rstudio server](https://posit.co/download/rstudio-server/) 与 [shiny server](https://posit.co/download/shiny-server/) 旨在简化在线建模分析与展示平台的搭建流程。部署后支持多用户通过浏览器远程访问 R 、Python（Julia）计算环境，并发布 shiny 应用，既能充分利用服务器计算资源，又便于团队协作与环境管理。本项目作为开箱即用的免费开源方案，适用于中小型团队及个人场景。
+dstudio 是一个基于 [jupyterhub](https://hub.docker.com/r/jupyterhub/jupyterhub/tags) 和 [jupyterlab](https://hub.docker.com/r/jupyter/datascience-notebook/) 容器构建的数据分析平台，集成了 [rstudio server](https://posit.co/download/rstudio-server/) 与 [shiny server](https://posit.co/download/shiny-server/),  旨在简化在线建模分析与展示平台的搭建流程。部署后支持多用户通过浏览器远程访问 R 、Python（Julia）计算环境，并发布 shiny 应用，既能充分利用服务器计算资源，又便于团队协作与环境管理。本项目作为开箱即用的免费开源方案，适用于中小型团队及个人场景。
 
 ## 核心组件
 
-dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
+dstudio 包含 dstudio_hub 和 dstudio_lab 两个镜像（image），
 - 其中，dstudio_hub 为用户管理中心，负责身份验证、权限管理，并为每位用户动态创建独立的 dstudio_lab 计算容器；
 - dstudio_lab 为集成开发环境镜像，包含 JupyterLab、RStudio 等 IDE，支持 Shiny 数据可视化，预安装常用工具包。
 
@@ -22,7 +22,7 @@ dstudio 包含 dstudio_hub 和 dstudio_lab 两个容器（image），
 
 ### 获取镜像
 
-如果服务器能够直接连接互联网，在终端中运行以下代码即可直接从 [dockerhub](https://hub.docker.com/repositories) 下载使用到的两个 docker image；
+- 如果服务器能够直接连接互联网，在终端中运行以下代码即可直接从 [dockerhub](https://hub.docker.com/repositories) 拉取镜像：
 
 ```
 # 拉取核心镜像 dstudio_hub 和 dstudio_lab
@@ -31,7 +31,7 @@ docker pull shichenxie/dstudio_lab:5.2.0 # 管理员计算环境（含完整功�
 docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户计算环境（限制文件下载）(可选)
 ```
 
-如果服务器没有互联网连接，可以先将拉取的镜像保存为离线文件，再拷贝至服务器加载。
+- 如果服务器没有互联网连接，可以先将拉取的镜像保存为离线文件，再拷贝至服务器加载。
 
 ```
 # 导出镜像为 tar 包
@@ -47,13 +47,13 @@ docker pull shichenxie/dstudio_lab:5.2.0ds # 普通用户计算环境（限制�
 
 ### 启动服务
 
-**下载配置文件** 可以直接通过命令行的形式下载，也可以手动复制保存。
+- **下载配置文件** 可以直接通过命令行的形式下载，也可以手动复制保存。
 
 ```
 curl -OL https://raw.githubusercontent.com/ShichenXie/dstudio/master/5.2.0/docker-compose.yml
 ```
 
-**启动与停止服务** 然后在 terminal 中进入配置文件 docker-compose.yml 文件所在的目录
+- **启动与停止服务** 然后在 terminal 中进入配置文件 docker-compose.yml 文件所在的目录
 
 ```
 # 启动服务
@@ -66,7 +66,7 @@ docker-compose up -d
 ### 访问地址
 
 - **本地部署**：`http://localhost`
-- **服务器部署**：http://服务器IP （需开放 80 端口）
+- **服务器部署**：`http://服务器IP` （需开放 80 端口）
 
 ## 使用指南
 
@@ -83,7 +83,7 @@ docker-compose up -d
 
 ### 文件存储
 
-- **个人目录**：每个用户登陆之后默认进入 `～/work` 文件夹，该文件夹将默认固化至 `jupyterlab-user-xxx` volume（xxx 为用户名），从而持久化保存用户的个人文件。在服务器的 terminal 中可通过 `docker volume ls` 查看所有 volume。
+- **个人目录**：每个用户登陆之后默认进入 `～/work` 文件夹，该文件夹将默认固化至 `jupyterlab-user-<用户名>` volume，从而持久化保存用户的个人文件。在服务器的 terminal 中可通过 `docker volume ls` 查看所有 volume。
 
 - **共享目录**：在 `～/work` 文件夹中还有一个 share 文件夹链接指向 `～/share`，这个文件夹内的任何修改将固化至 `jupyterlab-share` volume。所有用户的 share 文件夹都固化至同一个 volume，从而实现多用户之间的文件共享。
 
@@ -91,7 +91,7 @@ docker-compose up -d
 
 ### 文件下载权限
 
-文件的下载功能仅限管理员用户。普通用户如果需要下载文件可以保存至共享文件夹 `～/share`，再由管理员下载。如果希望普通用户也拥有文件下载功能，可以将 docker-compose.yml 中的 LAB_IMAGE_USER 参数设置成与 LAB_IMAGE_ADMIN 的一致。
+文件的下载功能仅限管理员用户。普通用户如果需要下载文件可以先保存至共享文件夹 `～/share`，再由管理员下载。如果希望普通用户也拥有文件下载功能，可以将 docker-compose.yml 中的 LAB_IMAGE_USER 参数设置成与 LAB_IMAGE_ADMIN 的一致。
 
 ## 计算环境
 
@@ -101,11 +101,11 @@ docker-compose up -d
 
 - **RStudio Server**：修改URL为 `http://localhost/user/<用户名>/rstudio`，支持 R 语言开发。 
 
-- **语言互通**：R 环境通过 [reticulate 包](https://rstudio.github.io/reticulate/)调用 Python；Python 环境通过 [rpy2 包](https://rpy2.github.io/) 调用 R。
+- **语言互通**：R 环境通过 [reticulate 包](https://rstudio.github.io/reticulate/) 调用 Python；Python 环境通过 [rpy2 包](https://rpy2.github.io/) 调用 R。
 
 ### shiny 服务
 
-- **访问方式**：可通过主页按钮直接进入 Shiny 页面，访问路径为 `http://localhost/user/<用户名>/shiny`
+- **访问方式**：可通过主页的 Shiny 按钮直接进入，访问路径为 `http://localhost/user/<用户名>/shiny`，普通用户如果没有在 LAB_USERS 参数中指定，默认访问 shiny 页面，当然也可以直接修改URL切换至 jupyterlab。
 
 - **自定义部署**：将自定义 Shiny 应用存放至容器内 /srv/shiny-server 目录，修改后需要固化容器，重启服务后，所有用户均能访问 shiny 应用。 
 
